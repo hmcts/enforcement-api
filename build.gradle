@@ -72,7 +72,7 @@ tasks.withType(JavaExec).configureEach {
 
 tasks.withType(Test) {
   useJUnitPlatform()
-
+//  maxParallelForks = Runtime.runtime.availableProcessors().intdiv(2) ?: 1
   testLogging {
     exceptionFormat = 'full'
   }
@@ -146,8 +146,20 @@ repositories {
 }
 
 ext {
-  log4JVersion = "2.24.3"
-  logbackVersion = "1.5.14"
+  byteBuddyVersion        = "1.17.2"
+  camundaVersion          = "7.22.0"
+  jacksonVersion          = "2.18.3"
+  junitPlatformVersion    = "1.12.1"
+  junitVersion            = "5.12.1"
+  hamcrestVersion         = "3.0"
+  launchDarklyVersion     = "6.3.0"
+  log4JVersion            = "2.24.3"
+  logbackVersion          = "1.5.17"
+  lombokVersion           = "1.18.36"
+  mockitoVersion          = "5.16.1"
+  springBootVersion       = springBoot.class.package.implementationVersion
+  springSecurityVersion   = "5.8.16"
+  testcontainersVersion   = "1.20.6"
 }
 
 ext['snakeyaml.version'] = '2.0'
@@ -168,7 +180,29 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
-  testImplementation(platform('org.junit:junit-bom:5.12.1'))
+  annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+  implementation group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+
+
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
+  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
+
+// Camunda: Oh no! Yikes!
+//  implementation group: 'org.camunda.bpm', name: 'camunda-external-task-client', version: camundaVersion
+//  implementation group: 'org.camunda.community.rest', name: 'camunda-platform-7-rest-client-spring-boot-starter', version: camundaVersion
+//  implementation group: 'org.camunda.bpm', name: 'camunda-engine-rest-core', version: camundaVersion
+
+  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: launchDarklyVersion
+
+  testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
+  testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
+  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: mockitoVersion
+
+  testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+  testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+
+  testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
@@ -179,7 +213,7 @@ dependencies {
 mainClassName = 'uk.gov.hmcts.reform.demo.Application'
 
 bootJar {
-  archiveFileName = "spring-boot-template.jar"
+  archiveFileName = "enforcement-api.jar"
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
