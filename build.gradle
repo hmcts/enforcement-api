@@ -151,7 +151,6 @@ ext {
   jacksonVersion          = "2.18.3"
   junitPlatformVersion    = "1.12.1"
   junitVersion            = "5.12.1"
-  hamcrestVersion         = "3.0"
   launchDarklyVersion     = "6.3.0"
   log4JVersion            = "2.24.3"
   logbackVersion          = "1.5.17"
@@ -190,7 +189,6 @@ dependencies {
 
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: launchDarklyVersion
 
-  testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
   testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
   testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: mockitoVersion
 
