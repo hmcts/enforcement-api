@@ -188,11 +188,6 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
 
-// Camunda: Oh no! Yikes!
-//  implementation group: 'org.camunda.bpm', name: 'camunda-external-task-client', version: camundaVersion
-//  implementation group: 'org.camunda.community.rest', name: 'camunda-platform-7-rest-client-spring-boot-starter', version: camundaVersion
-//  implementation group: 'org.camunda.bpm', name: 'camunda-engine-rest-core', version: camundaVersion
-
   implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: launchDarklyVersion
 
   testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
