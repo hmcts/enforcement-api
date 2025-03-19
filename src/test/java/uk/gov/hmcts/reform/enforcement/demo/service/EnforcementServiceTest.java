@@ -7,7 +7,7 @@ import uk.gov.hmcts.reform.enforcement.demo.model.AccountHolder;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class EnforcementServiceTest {
+class EnforcementServiceTest {
     @DisplayName("should calculate fine")
     @Test
     void calculateFine() {
