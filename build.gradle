@@ -187,8 +187,6 @@ dependencies {
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
   implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
 
-  implementation group: 'com.launchdarkly', name: 'launchdarkly-java-server-sdk', version: launchDarklyVersion
-
   testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
   testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: mockitoVersion
 
