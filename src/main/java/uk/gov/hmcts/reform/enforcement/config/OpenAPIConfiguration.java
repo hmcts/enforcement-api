@@ -13,8 +13,8 @@ public class OpenAPIConfiguration {
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
-            .info(new Info().title("enforcement api")
-                      .description("enforcement api")
+            .info(new Info().title("Enforcement API")
+                      .description("Enforcement API")
                       .version("v0.0.1")
                       .license(new License().name("MIT").url("https://opensource.org/licenses/MIT")))
             .externalDocs(new ExternalDocumentation()
