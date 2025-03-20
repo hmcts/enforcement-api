@@ -1,8 +1,8 @@
 java:
   applicationPort: 4550
-  image: 'hmctspublic.azurecr.io//enforcement:latest'
-  ingressHost: rpe-spring-boot-template-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-  aadIdentityName: rpe
+  image: 'hmctspublic.azurecr.io/enforcement:latest'
+  ingressHost: enforcement-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+  aadIdentityName: enforcement
 #  Uncomment once the vault containing the app insights key has been set up
 #  keyVaults:
 #    rpe:
