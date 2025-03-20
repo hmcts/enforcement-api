@@ -142,15 +142,15 @@ dependencyCheck {
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url 'https://jitpack.io' }
+  maven { url = 'https://jitpack.io' }
 }
 
 ext {
-  log4JVersion = "2.24.3"
-  logbackVersion = "1.5.18"
+  log4JVersion            = "2.24.3"
+  logbackVersion          = "1.5.17"
 }
 
-ext['snakeyaml.version'] = '2.0'
+ext['snakeyaml.version'] = '2.2'
 
 dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
@@ -168,7 +168,6 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
-  testImplementation(platform('org.junit:junit-bom:5.12.1'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
@@ -176,10 +175,12 @@ dependencies {
   }
 }
 
-mainClassName = 'uk.gov.hmcts.reform.demo.Application'
+application {
+  mainClassName = 'uk.gov.hmcts.reform.enforcement.Application'
+}
 
 bootJar {
-  archiveFileName = "spring-boot-template.jar"
+  archiveFileName = "enforcement-api.jar"
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
