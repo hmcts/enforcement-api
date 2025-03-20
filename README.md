@@ -14,10 +14,7 @@ Running the application requires the following tools to be installed in your env
 * [Docker](https://www.docker.com)
 * [Java 21](https://adoptium.net/)
 * [Gradle](https://gradle.org)
-* [Helm](https://helm.sh)
-* [Kubernetes](https://kubernetes.io)
-* [Kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-
+*
 ### Apple MacOS X
 
 * If you are developing on Apple MacOS X you can install except for Java the above tools using [Homebrew](https://brew.sh/)
