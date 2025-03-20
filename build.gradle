@@ -147,7 +147,6 @@ repositories {
 
 ext {
   byteBuddyVersion        = "1.17.2"
-  camundaVersion          = "7.22.0"
   jacksonVersion          = "2.18.3"
   junitPlatformVersion    = "1.12.1"
   junitVersion            = "5.12.1"
@@ -161,7 +160,7 @@ ext {
   testcontainersVersion   = "1.20.6"
 }
 
-ext['snakeyaml.version'] = '2.0'
+ext['snakeyaml.version'] = '2.2'
 
 dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
