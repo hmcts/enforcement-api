@@ -146,12 +146,8 @@ repositories {
 }
 
 ext {
-  jacksonVersion          = "2.18.3"
-  junitVersion            = "5.12.1"
   log4JVersion            = "2.24.3"
   logbackVersion          = "1.5.17"
-  lombokVersion           = "1.18.36"
-  mockitoVersion          = "5.16.1"
 }
 
 ext['snakeyaml.version'] = '2.2'
@@ -172,21 +168,6 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
-  annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-  implementation group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-
-
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
-  implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
-
-  testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
-  testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: mockitoVersion
-
-  testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-  testCompileOnly group: 'org.projectlombok', name: 'lombok', version: lombokVersion
-
-  testImplementation(platform("org.junit:junit-bom:${junitVersion}"))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
