@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.enforcement.demo;
+package uk.gov.hmcts.reform.enforcement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
