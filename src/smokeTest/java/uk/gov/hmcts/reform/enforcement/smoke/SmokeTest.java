@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.enforcement.controllers;
+package uk.gov.hmcts.reform.enforcement.smoke;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -12,7 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static io.restassured.RestAssured.given;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-class SampleSmokeTest {
+class SmokeTest {
 
     @Value("${TEST_URL:http://localhost:8080}")
     private String testUrl;
