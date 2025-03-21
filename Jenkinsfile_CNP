@@ -6,4 +6,25 @@ def type = "java"
 def product = "enforcement"
 def component = "api"
 
-withPipeline(type, product, component) {}
+withPipeline(type, product, component) {
+  afterAlways('functionalTest:preview') {
+    archiveFunctionalTestReports()
+  }
+
+  afterAlways('functionalTest:aat') {
+    archiveFunctionalTestReports()
+  }
+}
+
+def archiveFunctionalTestReports() {
+  publishHTML([
+    allowMissing: true,
+    alwaysLinkToLastBuild: true,
+    keepAll: true,
+    reportDir: "report-for-functional-tests",
+    reportFiles: 'index.html',
+    reportName: 'API Functional Test Report'
+  ])
+
+  archiveArtifacts allowEmptyArchive: true, artifacts: '**/report-for-functional-tests/*'
+}
