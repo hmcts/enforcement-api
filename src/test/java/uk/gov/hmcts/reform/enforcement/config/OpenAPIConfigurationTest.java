@@ -6,8 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class OpenAPIConfigurationTest {
@@ -19,19 +18,19 @@ class OpenAPIConfigurationTest {
     void shouldCreateOpenAPIBean() {
         OpenAPI openAPI = context.getBean(OpenAPI.class);
 
-        assertNotNull(openAPI);
+        assertThat(openAPI).isNotNull();
+        assertThat(openAPI.getInfo()).isNotNull();
 
-        assertNotNull(openAPI.getInfo());
-        assertEquals("Enforcement API", openAPI.getInfo().getTitle());
-        assertEquals("Enforcement API", openAPI.getInfo().getDescription());
-        assertEquals("v0.0.1", openAPI.getInfo().getVersion());
+        assertThat(openAPI.getInfo().getTitle()).isEqualTo("Enforcement API");
+        assertThat(openAPI.getInfo().getDescription()).isEqualTo("Enforcement API");
+        assertThat(openAPI.getInfo().getVersion()).isEqualTo("v0.0.1");
 
-        assertNotNull(openAPI.getInfo().getLicense());
-        assertEquals("MIT", openAPI.getInfo().getLicense().getName());
-        assertEquals("https://opensource.org/licenses/MIT", openAPI.getInfo().getLicense().getUrl());
+        assertThat(openAPI.getInfo().getLicense()).isNotNull();
+        assertThat(openAPI.getInfo().getLicense().getName()).isEqualTo("MIT");
+        assertThat(openAPI.getInfo().getLicense().getUrl()).isEqualTo("https://opensource.org/licenses/MIT");
 
-        assertNotNull(openAPI.getExternalDocs());
-        assertEquals("README", openAPI.getExternalDocs().getDescription());
-        assertEquals("https://github.com/hmcts/enforcement-api", openAPI.getExternalDocs().getUrl());
+        assertThat(openAPI.getExternalDocs()).isNotNull();
+        assertThat(openAPI.getExternalDocs().getDescription()).isEqualTo("README");
+        assertThat(openAPI.getExternalDocs().getUrl()).isEqualTo("https://github.com/hmcts/enforcement-api");
     }
 }
