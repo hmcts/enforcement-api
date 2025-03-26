@@ -27,7 +27,7 @@ spring:
     name: enforcement api
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${ENFORCEMENT_DB_HOST}:${DB_PORT}/${ENFORCEMENT_DB_NAME}${ENFORCEMENT_DB_OPTIONS:}
+    url: jdbc:postgresql://${ENFORCEMENT_DB_HOST:localhost}:${DB_PORT:5432}/${ENFORCEMENT_DB_NAME:enforcement}${ENFORCEMENT_DB_OPTIONS:}
     username: ${ENFORCEMENT_DB_USER_NAME}
     password: ${ENFORCEMENT_DB_PASSWORD}
     properties:
