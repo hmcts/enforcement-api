@@ -17,14 +17,14 @@ management:
         include: health, info, prometheus
 
 springdoc:
-  packagesToScan: uk.gov.hmcts.reform.demo.controllers
+  packagesToScan: uk.gov.hmcts.reform.enforcement
   writer-with-order-by-keys: true
 
 spring:
   config:
-    import: "optional:configtree:/mnt/secrets/rpe/"
+    import: "optional:configtree:/mnt/secrets/enforcement/"
   application:
-    name: Spring Boot Template
+    name: enforcement api
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${ENFORCEMENT_DB_HOST}:${ENFORCEMENT_DB_PORT}/${ENFORCEMENT_DB_NAME}${ENFORCEMENT_DB_OPTIONS:}
