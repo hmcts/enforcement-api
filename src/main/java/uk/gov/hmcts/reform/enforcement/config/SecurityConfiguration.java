@@ -42,7 +42,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    @SuppressWarnings({"PMD.SignatureDeclareThrowsException", "squid:S4502"})
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.addFilterBefore(serviceAuthFilter, AbstractPreAuthenticatedProcessingFilter.class)
