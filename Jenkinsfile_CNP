@@ -6,7 +6,31 @@ def type = "java"
 def product = "enforcement"
 def component = "api"
 
+def secrets = [
+  'enforcement-${env}': [
+    secret('enforcement-api-s2s-secret', 'ENFORCEMENT_API_S2S_SECRET')
+  ]
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [$class     : 'AzureKeyVaultSecret',
+   secretType : 'Secret',
+   name       : secretName,
+   version    : '',
+   envVariable: envVar
+  ]
+}
+
 withPipeline(type, product, component) {
+  onPR() {
+    setPreviewEnvVars()
+//    afterSuccess('smoketest:preview') {
+//      runE2eTests(env.ENVIRONMENT)
+//    }
+  }
+  env.IDAM_S2S_AUTH_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+  loadVaultSecrets(secrets)
+
   afterAlways('functionalTest:preview') {
     archiveFunctionalTestReports()
   }
@@ -16,14 +40,20 @@ withPipeline(type, product, component) {
   }
 }
 
+def setPreviewEnvVars() {
+  // TODO: Update URL to include XUI when available
+  env.TEST_E2E_URL_WEB = "https://enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
+  env.ENVIRONMENT= "preview"
+}
+
 def archiveFunctionalTestReports() {
   publishHTML([
-    allowMissing: true,
+    allowMissing         : true,
     alwaysLinkToLastBuild: true,
-    keepAll: true,
-    reportDir: "report-for-functional-tests",
-    reportFiles: 'index.html',
-    reportName: 'API Functional Test Report'
+    keepAll              : true,
+    reportDir            : "report-for-functional-tests",
+    reportFiles          : 'index.html',
+    reportName           : 'API Functional Test Report'
   ])
 
   archiveArtifacts allowEmptyArchive: true, artifacts: '**/report-for-functional-tests/*'
