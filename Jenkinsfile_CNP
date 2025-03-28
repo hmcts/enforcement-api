@@ -8,7 +8,7 @@ def component = "api"
 
 def secrets = [
   'pcs-${env}': [
-    secret('pcs-api-s2s-secret', 'PCS_API_S2S_SECRET')
+    secret('enforcement-api-s2s-secret', 'ENFORCEMENT_API_S2S_SECRET')
   ]
 ]
 
