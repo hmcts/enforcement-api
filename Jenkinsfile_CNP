@@ -7,7 +7,7 @@ def product = "enforcement"
 def component = "api"
 
 def secrets = [
-  'pcs-${env}': [
+  'enforcement-${env}': [
     secret('enforcement-api-s2s-secret', 'ENFORCEMENT_API_S2S_SECRET')
   ]
 ]
