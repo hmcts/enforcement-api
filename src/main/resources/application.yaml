@@ -64,6 +64,9 @@ idam:
   s2s-authorised:
     services: ${S2S_NAMES_WHITELIST:enforcement_api,pcs_api,pcs_frontend}
 
+notify:
+  api-key: ${ENFORCEMENT_NOTIFY_API_KEY:AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}
+
 azure:
   application-insights:
     instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
