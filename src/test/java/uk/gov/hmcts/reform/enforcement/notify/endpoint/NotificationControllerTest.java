@@ -1,11 +1,9 @@
 package uk.gov.hmcts.reform.enforcement.notify.endpoint;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
 import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
@@ -18,7 +16,6 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -88,6 +85,6 @@ class NotificationControllerTest {
                         Optional.of("noreply@example.com")
                 );
 
-        verify(notificationService, times(1)).sendEmail(emailRequest);
+        verify(notificationService).sendEmail(emailRequest);
     }
 }

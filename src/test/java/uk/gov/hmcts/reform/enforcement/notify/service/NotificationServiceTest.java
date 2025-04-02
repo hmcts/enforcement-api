@@ -19,7 +19,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,7 +55,7 @@ class NotificationServiceTest {
                 .extracting(SendEmailResponse::getNotificationId)
                 .isEqualTo(expectedNotificationId);
 
-        verify(notificationClient, times(1))
+        verify(notificationClient)
                 .sendEmail(anyString(), anyString(), anyMap(), anyString());
     }
 
@@ -77,7 +76,7 @@ class NotificationServiceTest {
                 .isInstanceOf(NotificationException.class)
                 .hasMessage("Email failed to send, please try again.");
 
-        verify(notificationClient, times(1))
+        verify(notificationClient)
                 .sendEmail(anyString(), anyString(), anyMap(), anyString());
     }
 }
