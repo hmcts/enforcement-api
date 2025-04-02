@@ -28,6 +28,7 @@ public class SecurityConfiguration {
 
     @Autowired
     public SecurityConfiguration(ServiceAuthFilter serviceAuthFilter) {
+        super();
         this.serviceAuthFilter = serviceAuthFilter;
     }
 
@@ -45,11 +46,11 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.addFilterBefore(serviceAuthFilter, AbstractPreAuthenticatedProcessingFilter.class)
-            .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(STATELESS))
-            .httpBasic(AbstractHttpConfigurer::disable)
-            .formLogin(AbstractHttpConfigurer::disable)
-            .logout(AbstractHttpConfigurer::disable)
-            .csrf(AbstractHttpConfigurer::disable);
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(STATELESS))
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
