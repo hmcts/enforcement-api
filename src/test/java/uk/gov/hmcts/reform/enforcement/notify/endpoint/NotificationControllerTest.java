@@ -82,8 +82,7 @@ class NotificationControllerTest {
                         "/template/uri",
                         "Email body content",
                         "Email subject",
-                        Optional.of("noreply@example.com")
-                );
+                        Optional.of("noreply@example.com"));
 
         verify(notificationService).sendEmail(emailRequest);
     }
