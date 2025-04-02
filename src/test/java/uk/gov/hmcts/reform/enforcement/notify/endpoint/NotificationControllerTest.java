@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.enforcement.notify.endpoint;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
 import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 import uk.gov.service.notify.SendEmailResponse;
@@ -13,15 +15,14 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class NotificationControllerTest {
 
     @Mock
@@ -29,11 +30,6 @@ class NotificationControllerTest {
 
     @InjectMocks
     private NotifyController notifyController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     void testSendEmail_Success() {
@@ -68,20 +64,29 @@ class NotificationControllerTest {
                 emailRequest
         );
 
-        assertNotNull(response);
-        assertTrue(response.getStatusCode().is2xxSuccessful());
-        assertNotNull(response.getBody());
-
-        var responseBody = response.getBody();
-        assertEquals(notificationId, responseBody.getNotificationId());
-        assertEquals(Optional.of("reference"), responseBody.getReference());
-        assertEquals(Optional.of(unsubscribeUrl), responseBody.getOneClickUnsubscribeURL());
-        assertEquals(templateId, responseBody.getTemplateId());
-        assertEquals(1, responseBody.getTemplateVersion());
-        assertEquals("/template/uri", responseBody.getTemplateUri());
-        assertEquals("Email body content", responseBody.getBody());
-        assertEquals("Email subject", responseBody.getSubject());
-        assertEquals(Optional.of("noreply@example.com"), responseBody.getFromEmail());
+        assertThat(response.getBody())
+                .extracting(
+                        SendEmailResponse::getNotificationId,
+                        SendEmailResponse::getReference,
+                        SendEmailResponse::getOneClickUnsubscribeURL,
+                        SendEmailResponse::getTemplateId,
+                        SendEmailResponse::getTemplateVersion,
+                        SendEmailResponse::getTemplateUri,
+                        SendEmailResponse::getBody,
+                        SendEmailResponse::getSubject,
+                        SendEmailResponse::getFromEmail
+                )
+                .containsExactly(
+                        notificationId,
+                        Optional.of("reference"),
+                        Optional.of(unsubscribeUrl),
+                        templateId,
+                        1,
+                        "/template/uri",
+                        "Email body content",
+                        "Email subject",
+                        Optional.of("noreply@example.com")
+                );
 
         verify(notificationService, times(1)).sendEmail(emailRequest);
     }
