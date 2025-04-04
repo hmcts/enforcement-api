@@ -8,8 +8,7 @@ def component = "api"
 
 def secrets = [
   'enforcement-${env}': [
-    secret('enforcement-api-s2s-secret', 'ENFORCEMENT_API_S2S_SECRET'),
-    secret('govnotify-test-key', 'ENFORCEMENT_NOTIFY_API_KEY')
+    secret('enforcement-api-s2s-secret', 'ENFORCEMENT_API_S2S_SECRET')
   ]
 ]
 
