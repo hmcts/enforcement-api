@@ -6,7 +6,7 @@ java:
     enforcement:
       secrets:
         - name: govnotify-test-key
-        - alias: ENFORCEMENT_NOTIFY_API_KEY
+          alias: ENFORCEMENT_NOTIFY_API_KEY
         - name: app-insights-connection-string
   environment:
     ENFORCEMENT_DB_HOST: "{{ .Release.Name }}-postgresql"
