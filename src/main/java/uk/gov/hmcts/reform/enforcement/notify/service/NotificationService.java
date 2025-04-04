@@ -30,6 +30,10 @@ public class NotificationService {
         final String referenceId = UUID.randomUUID().toString();
 
         try {
+            log.debug("Api Key: {}", notificationClient.getApiKey());
+            log.debug("Service ID: {}", notificationClient.getServiceId());
+            log.debug("Base URL: {}", notificationClient.getBaseUrl());
+            log.debug("Proxy: {}", notificationClient.getProxy());
             sendEmailResponse = notificationClient.sendEmail(
                 templateId,
                 destinationAddress,
