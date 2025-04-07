@@ -34,7 +34,7 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/enforcement/"
   application:
-    name: enforcement api
+    name: Enforcement API
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${ENFORCEMENT_DB_HOST:localhost}:${DB_PORT:5432}/${ENFORCEMENT_DB_NAME:enforcement}${ENFORCEMENT_DB_OPTIONS:}
