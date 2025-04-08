@@ -20,6 +20,15 @@ springdoc:
   packagesToScan: uk.gov.hmcts.reform.enforcement
   writer-with-order-by-keys: true
 
+security:
+  anonymousPaths:
+    - "/health"
+    - "/health/liveness"
+    - "/health/readiness"
+    - "/swagger-ui.html"
+    - "/swagger-ui/**"
+    - "/v3/api-docs/**"
+
 spring:
   config:
     import: "optional:configtree:/mnt/secrets/enforcement/"
@@ -46,6 +55,14 @@ spring:
           lob:
             # silence the 'wall-of-text' - unnecessary exception throw about blob types
             non_contextual_creation: true
+
+idam:
+  s2s-auth:
+    url: ${IDAM_S2S_AUTH_URL:http://localhost:4502}
+    totp_secret: ${ENFORCEMENT_API_S2S_SECRET:AAAAAAAAAAAAAAAA}
+    microservice: ${S2S_SERVICE_NAME:enforcement_api}
+  s2s-authorised:
+    services: ${S2S_NAMES_WHITELIST:enforcement_api,pcs_api,pcs_frontend}
 
 azure:
   application-insights:
