@@ -17,7 +17,8 @@ management:
         include: health, info, prometheus
 
 springdoc:
-  packagesToScan: uk.gov.hmcts.reform.enforcement
+  packagesToScan:
+    - uk.gov.hmcts.reform.enforcement
   writer-with-order-by-keys: true
 
 security:
@@ -33,7 +34,7 @@ spring:
   config:
     import: "optional:configtree:/mnt/secrets/enforcement/"
   application:
-    name: enforcement api
+    name: Enforcement API
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${ENFORCEMENT_DB_HOST:localhost}:${DB_PORT:5432}/${ENFORCEMENT_DB_NAME:enforcement}${ENFORCEMENT_DB_OPTIONS:}
@@ -64,6 +65,9 @@ idam:
   s2s-authorised:
     services: ${S2S_NAMES_WHITELIST:enforcement_api,pcs_api,pcs_frontend}
 
+notify:
+  api-key: ${ENFORCEMENT_NOTIFY_API_KEY:AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}
+
 azure:
   application-insights:
-    instrumentation-key: ${rpe.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+    instrumentation-key: ${enforcement.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}

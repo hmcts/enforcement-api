@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.enforcement.config;
 
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -23,16 +24,14 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 public class SecurityConfiguration {
 
+    @Getter
     private final List<String> anonymousPaths = new ArrayList<>();
     private final ServiceAuthFilter serviceAuthFilter;
 
     @Autowired
     public SecurityConfiguration(ServiceAuthFilter serviceAuthFilter) {
+        super();
         this.serviceAuthFilter = serviceAuthFilter;
-    }
-
-    public List<String> getAnonymousPaths() {
-        return anonymousPaths;
     }
 
     @Bean
