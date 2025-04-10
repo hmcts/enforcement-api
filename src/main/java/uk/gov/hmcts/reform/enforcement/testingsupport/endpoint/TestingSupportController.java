@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.enforcement.notify.endpoint;
+package uk.gov.hmcts.reform.enforcement.testingsupport.endpoint;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -21,12 +21,12 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 @RestController
-@RequestMapping("/notify")
-public class NotifyController {
+@RequestMapping("/testing-support")
+public class TestingSupportController {
 
     private final NotificationService notificationService;
 
-    public NotifyController(NotificationService notificationService) {
+    public TestingSupportController(NotificationService notificationService) {
         this.notificationService = notificationService;
     }
 
