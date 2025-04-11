@@ -179,49 +179,72 @@ repositories {
 }
 
 ext {
-  log4JVersion = "2.24.3"
-  logbackVersion = "1.5.18"
-  lombok = '1.18.36'
+  springBootVersion = '3.2.4'
+  springDocVersion = '2.8.6'
+  notifyClientVersion = '5.2.1-RELEASE'
+  hmctsLoggingVersion = '6.1.8'
+  serviceAuthVersion = '5.3.0'
+  log4JVersion = '2.24.3'
+  logbackVersion = '1.5.18'
+  lombokVersion = '1.18.36'
+  postgresVersion = '42.7.4'
+  serenityVersion = '4.2.17'
+  swaggerAnnotationsVersion = '2.2.30'
+  junitPlatformVersion = '1.12.1'
+  springSecurityTestVersion = '6.4.4'
 }
 
 ext['snakeyaml.version'] = '2.2'
 
 dependencies {
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-jdbc'
-  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security'
+  // Spring Boot Starters
+  implementation "org.springframework.boot:spring-boot-starter-web"
+  implementation "org.springframework.boot:spring-boot-starter-actuator"
+  implementation "org.springframework.boot:spring-boot-starter-aop"
+  implementation "org.springframework.boot:spring-boot-starter-json"
+  implementation "org.springframework.boot:spring-boot-starter-jdbc"
+  implementation "org.springframework.boot:spring-boot-starter-security"
 
-  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.6'
+  // SpringDoc OpenAPI
+  implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion"
 
-  implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: '5.2.1-RELEASE'
-  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.8'
-  implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.0'
+  // External Services
+  implementation "uk.gov.service.notify:notifications-java-client:$notifyClientVersion"
+  implementation "com.github.hmcts.java-logging:logging:$hmctsLoggingVersion"
+  implementation "com.github.hmcts:service-auth-provider-java-client:$serviceAuthVersion"
 
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
-  implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
-  implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
-  implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.5'
+  // Logging
+  implementation "org.apache.logging.log4j:log4j-api:$log4JVersion"
+  implementation "org.apache.logging.log4j:log4j-to-slf4j:$log4JVersion"
+  implementation "ch.qos.logback:logback-classic:$logbackVersion"
+  implementation "ch.qos.logback:logback-core:$logbackVersion"
 
-  implementation group: 'org.projectlombok', name: 'lombok', version: lombok
-  annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombok
+  // Database
+  implementation "org.postgresql:postgresql:$postgresVersion"
 
-  implementation group: 'io.rest-assured', name: 'rest-assured'
+  // Lombok
+  implementation "org.projectlombok:lombok:$lombokVersion"
+  annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-  implementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '4.2.17'
-  implementation group: 'net.serenity-bdd', name: 'serenity-core', version: '4.2.17'
-  testImplementation group: 'net.serenity-bdd', name: 'serenity-junit5', version: '4.2.17'
-  testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: '1.12.1'
+  // API Testing
+  implementation "io.rest-assured:rest-assured"
 
-  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
+  // Serenity
+  implementation "net.serenity-bdd:serenity-rest-assured:$serenityVersion"
+  implementation "net.serenity-bdd:serenity-core:$serenityVersion"
+  testImplementation "net.serenity-bdd:serenity-junit5:$serenityVersion"
+
+  // Swagger
+  implementation "io.swagger.core.v3:swagger-annotations:$swaggerAnnotationsVersion"
+
+  // Testing
+  testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine"
+  testImplementation("org.springframework.boot:spring-boot-starter-test") {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.4.4'
+  testImplementation "org.springframework.security:spring-security-test:$springSecurityTestVersion"
+  testImplementation "org.junit.platform:junit-platform-suite-api:$junitPlatformVersion"
 }
 
 application {
