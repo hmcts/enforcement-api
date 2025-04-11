@@ -42,7 +42,7 @@ public class ServiceAuthorisationConsumerTest {
     @Autowired
     private ServiceAuthorisationApi serviceAuthorisationApi;
 
-    @Pact(provider = "s2s_auth", consumer = "pcs_api")
+    @Pact(provider = "s2s_auth", consumer = "enforcement_api")
     public V4Pact executeLease(PactDslWithProvider builder) throws JsonProcessingException {
 
         return builder
@@ -58,7 +58,7 @@ public class ServiceAuthorisationConsumerTest {
             .toPact(V4Pact.class);
     }
 
-    @Pact(provider = "s2s_auth", consumer = "pcs_api")
+    @Pact(provider = "s2s_auth", consumer = "enforcement_api")
     public V4Pact executeDetails(PactDslWithProvider builder) throws JsonProcessingException {
 
         return builder.given("microservice with valid token")
