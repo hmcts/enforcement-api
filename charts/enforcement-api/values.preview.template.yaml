@@ -15,3 +15,5 @@ java:
     ENFORCEMENT_DB_NAME: "{{ .Values.postgresql.auth.database}}"
   postgresql:
     enabled: true
+  testing-support:
+    enabled: true
