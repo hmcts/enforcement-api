@@ -16,4 +16,4 @@ java:
   postgresql:
     enabled: true
   testing-support:
-    enabled: true
+    ENABLE_TESTING_SUPPORT: true
