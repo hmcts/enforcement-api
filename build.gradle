@@ -181,7 +181,7 @@ repositories {
 ext {
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
-  lombok = '1.18.36'
+  lombok = '1.18.38'
 }
 
 ext['snakeyaml.version'] = '2.2'
