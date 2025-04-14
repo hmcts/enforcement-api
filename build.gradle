@@ -214,7 +214,7 @@ dependencies {
   implementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '4.2.17'
   implementation group: 'net.serenity-bdd', name: 'serenity-core', version: '4.2.17'
   testImplementation group: 'net.serenity-bdd', name: 'serenity-junit5', version: '4.2.17'
-  testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: '1.12.1'
+  testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: '1.12.2'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
