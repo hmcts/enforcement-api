@@ -25,3 +25,4 @@ applicationinsights-agent-*.jar
 *.log
 /report-for-functional-tests/
 /target/
+/pacts/
