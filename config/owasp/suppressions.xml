@@ -12,7 +12,6 @@
     <notes>False Positive
       <![CDATA[file name: net.serenity-bdd:serenity-core:4.2.19.jar ]]>
     </notes>
-    <packageUrl regex="true">^pkg:maven/net\.serenity-bdd@.*$</packageUrl>
     <cve>CVE-2024-6763</cve>
     <cve>CVE-2024-26318</cve>
   </suppress>
