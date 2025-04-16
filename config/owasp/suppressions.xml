@@ -44,5 +44,47 @@
     <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-util@.*$</packageUrl>
     <cve>CVE-2024-6763</cve>
   </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for Serenity Core</notes>
+    <packageUrl regex="true">^pkg:maven/net\.serenity\-bdd/serenity\-core@.*$</packageUrl>
+    <cve>CVE-2024-26318</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for Serenity Model</notes>
+    <packageUrl regex="true">^pkg:maven/net\.serenity\-bdd/serenity\-model@.*$</packageUrl>
+    <cve>CVE-2024-26318</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for Serenity Report Resources</notes>
+    <packageUrl regex="true">^pkg:maven/net\.serenity\-bdd/serenity\-report\-resources@.*$</packageUrl>
+    <cve>CVE-2024-26318</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for Serenity Reports</notes>
+    <packageUrl regex="true">^pkg:maven/net\.serenity\-bdd/serenity\-reports@.*$</packageUrl>
+    <cve>CVE-2024-26318</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for Serenity Reports Configuration</notes>
+    <packageUrl regex="true">^pkg:maven/net\.serenity\-bdd/serenity\-reports\-configuration@.*$</packageUrl>
+    <cve>CVE-2024-26318</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for Serenity Rest-Assured</notes>
+    <packageUrl regex="true">^pkg:maven/net\.serenity\-bdd/serenity\-rest\-assured@.*$</packageUrl>
+    <cve>CVE-2024-26318</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for Serenity Stats</notes>
+    <packageUrl regex="true">^pkg:maven/net\.serenity\-bdd/serenity\-stats@.*$</packageUrl>
+    <cve>CVE-2024-26318</cve>
+  </suppress>
   <!--End of false positives section -->
 </suppressions>
