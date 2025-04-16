@@ -8,5 +8,41 @@
     <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
     <cve>CVE-2023-35116</cve>
   </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for htmlunit-websocket-client transitive dependencies</notes>
+    <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty\.websocket/websocket\-client@.*$</packageUrl>
+    <cve>CVE-2024-6763</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for htmlunit-websocket-client transitive dependencies</notes>
+    <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty\.websocket/websocket\-common@.*$</packageUrl>
+    <cve>CVE-2024-6763</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for htmlunit-websocket-client transitive dependencies</notes>
+    <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-client@.*$</packageUrl>
+    <cve>CVE-2024-6763</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for htmlunit-websocket-client transitive dependencies</notes>
+    <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-http@.*$</packageUrl>
+    <cve>CVE-2024-6763</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for htmlunit-websocket-client transitive dependencies</notes>
+    <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-io@.*$</packageUrl>
+    <cve>CVE-2024-6763</cve>
+  </suppress>
+
+  <suppress>
+    <notes>False positive or accepted risk for htmlunit-websocket-client transitive dependencies</notes>
+    <packageUrl regex="true">^pkg:maven/org\.eclipse\.jetty/jetty\-util@.*$</packageUrl>
+    <cve>CVE-2024-6763</cve>
+  </suppress>
   <!--End of false positives section -->
 </suppressions>
