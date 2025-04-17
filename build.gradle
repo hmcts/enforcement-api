@@ -227,6 +227,7 @@ ext {
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
   lombok = '1.18.38'
+  serenityBddVersion = "4.2.19"
 }
 
 ext['snakeyaml.version'] = '2.2'
@@ -256,9 +257,9 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
-  implementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: '4.2.19'
-  implementation group: 'net.serenity-bdd', name: 'serenity-core', version: '4.2.19'
-  testImplementation group: 'net.serenity-bdd', name: 'serenity-junit5', version: '4.2.19'
+  implementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: serenityBddVersion
+  implementation group: 'net.serenity-bdd', name: 'serenity-core', version: serenityBddVersion
+  testImplementation group: 'net.serenity-bdd', name: 'serenity-junit5', version: serenityBddVersion
   testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: '1.12.2'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
