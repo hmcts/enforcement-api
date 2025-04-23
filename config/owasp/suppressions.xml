@@ -3,10 +3,20 @@
   <!--Please add all the false positives under the below section-->
   <suppress>
     <notes>False Positive
-      <![CDATA[file name: jackson-databind-2.15.2.jar]]>
+      <![CDATA[file name: net.serenity-bdd:serenity-core:4.2.19.jar ]]>
+      This does not apply to this version, only .NET and TypeScript versions
     </notes>
-    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson\-databind@.*$</packageUrl>
-    <cve>CVE-2023-35116</cve>
+    <cve>
+      CVE-2024-6763
+    </cve>
   </suppress>
   <!--End of false positives section -->
+  <suppress>
+    <notes>
+      This is a sub dependency that cannot be upgraded
+    </notes>
+    <cve>
+      CVE-2024-26318
+    </cve>
+  </suppress>
 </suppressions>
