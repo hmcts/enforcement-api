@@ -270,7 +270,7 @@ dependencies {
   testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.4.5'
 
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: '4.6.17'
-  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.11.4')
+  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.12.2')
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
 }
