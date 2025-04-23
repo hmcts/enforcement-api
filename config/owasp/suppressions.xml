@@ -6,17 +6,13 @@
       <![CDATA[file name: net.serenity-bdd:serenity-core:4.2.19.jar ]]>
       This does not apply to this version, only .NET and TypeScript versions
     </notes>
-    <cve>
-      CVE-2024-26318
-    </cve>
+    <cve>CVE-2024-26318</cve>
   </suppress>
   <suppress>
     <notes>
       This is a sub dependency of au.com.dius.pact.consumer that does not have a fix version
     </notes>
-    <cve>
-      CVE-2024-6763
-    </cve>
+    <cve>CVE-2024-6763</cve>
   </suppress>
   <!--End of false positives section -->
 </suppressions>
