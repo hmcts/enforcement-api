@@ -227,7 +227,7 @@ ext {
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
   lombok = '1.18.38'
-  serenityBddVersion = "4.2.19"
+  serenityBddVersion = "4.2.22"
 }
 
 ext['snakeyaml.version'] = '2.2'
