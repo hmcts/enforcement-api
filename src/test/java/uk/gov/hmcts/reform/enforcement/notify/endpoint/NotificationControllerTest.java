@@ -29,7 +29,7 @@ class NotificationControllerTest {
     private NotifyController notifyController;
 
     @Test
-    void testSendEmailSuccess() {
+    void testSendEmail_Success() {
         var notificationId = UUID.randomUUID();
         var templateId = UUID.randomUUID();
         var unsubscribeUrl = URI.create("https://unsubscribe.example.com");
