@@ -63,7 +63,7 @@ idam:
     totp_secret: ${ENFORCEMENT_API_S2S_SECRET:AAAAAAAAAAAAAAAA}
     microservice: ${S2S_SERVICE_NAME:enforcement_api}
   s2s-authorised:
-    services: ${S2S_NAMES_WHITELIST:enforcement_api,pcs_api,pcs_frontend}
+    services: ${S2S_NAMES_WHITELIST:enforcement_api,pcs_api,pcs_frontend,ccd_data}
 
 notify:
   api-key: ${ENFORCEMENT_NOTIFY_API_KEY:AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}
