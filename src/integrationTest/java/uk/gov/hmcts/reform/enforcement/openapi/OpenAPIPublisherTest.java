@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,16 +24,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@ActiveProfiles("integration")
 class OpenAPIPublisherTest {
 
-    @Autowired
-    private MockMvc mvc;
+    private final MockMvc mockMvc;
+
+    OpenAPIPublisherTest(@Autowired MockMvc mockMvc) {
+        this.mockMvc = mockMvc;
+    }
 
     @DisplayName("Generate swagger documentation")
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void generateDocs() throws Exception {
-        byte[] specs = mvc.perform(get("/v3/api-docs"))
+        byte[] specs = mockMvc.perform(get("/v3/api-docs"))
             .andExpect(status().isOk())
             .andReturn()
             .getResponse()

@@ -56,6 +56,12 @@ spring:
           lob:
             # silence the 'wall-of-text' - unnecessary exception throw about blob types
             non_contextual_creation: true
+  flyway:
+    enabled: false
+
+flyway:
+  noop:
+    strategy: ${FLYWAY_NOOP_STRATEGY:true}
 
 idam:
   s2s-auth:
