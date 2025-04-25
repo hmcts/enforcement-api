@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.enforcement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
+import uk.gov.hmcts.reform.idam.client.IdamApi;
 
 @SpringBootApplication(
     scanBasePackages = {
@@ -10,6 +12,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
     }
 )
 @SuppressWarnings("HideUtilityClassConstructor")
+@EnableFeignClients(
+    clients = {
+        IdamApi.class
+    }
+)
 public class Application {
     public static void main(final String[] args) {
         SpringApplication.run(Application.class, args);
