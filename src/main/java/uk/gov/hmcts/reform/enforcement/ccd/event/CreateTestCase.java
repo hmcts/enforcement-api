@@ -29,7 +29,8 @@ public class CreateTestCase implements CCDConfig<EnforcementCase, State, UserRol
             .done();
     }
 
-    private AboutToStartOrSubmitResponse<EnforcementCase, State> start(CaseDetails<EnforcementCase, State> caseDetails) {
+    private AboutToStartOrSubmitResponse<EnforcementCase, State> start(
+        CaseDetails<EnforcementCase, State> caseDetails) {
         EnforcementCase data = caseDetails.getData();
         data.setApplicantForename("Preset value");
 
@@ -38,8 +39,9 @@ public class CreateTestCase implements CCDConfig<EnforcementCase, State, UserRol
             .build();
     }
 
-    public AboutToStartOrSubmitResponse<EnforcementCase, State> aboutToSubmit(CaseDetails<EnforcementCase, State> details,
-                                                                      CaseDetails<EnforcementCase, State> beforeDetails) {
+    public AboutToStartOrSubmitResponse<EnforcementCase, State> aboutToSubmit(
+        CaseDetails<EnforcementCase, State> details,
+        CaseDetails<EnforcementCase, State> beforeDetails) {
         // TODO: Whatever you need.
         return AboutToStartOrSubmitResponse.<EnforcementCase, State>builder()
             .data(details.getData())

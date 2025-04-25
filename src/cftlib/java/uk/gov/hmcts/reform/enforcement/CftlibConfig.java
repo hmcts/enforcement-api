@@ -25,7 +25,7 @@ public class CftlibConfig implements CFTLibConfigurer {
     @Override
     public void configure(CFTLib lib) throws Exception {
         var users = Map.of(
-            "caseworker@pcs.com", List.of("caseworker", "caseworker-civil"));
+            "caseworker@enforcement.com", List.of("caseworker", "caseworker-civil"));
 
         // Create users and roles including in idam simulator
         for (var entry : users.entrySet()) {

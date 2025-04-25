@@ -13,18 +13,6 @@ To build the project execute the following command:
   ./gradlew build
 ```
 
-
-### Running enforcement-api with local CCD
-
- ```bash
- ./gradlew bootWithCCD
- ```
-Above command starts Enforcement API + CCD & all dependencies
-
-Once successfully loaded open XUI at http://localhost:3000
-See `CftlibConfig.java` for users and login details.
-
-
 ### Running the application
 
 Create the image of the application by executing the following command:
@@ -92,6 +80,16 @@ docker image rm <image-id>
 ```
 
 There is no need to remove postgres and java or similar core images.
+
+### Running enforcement-api with local CCD
+
+ ```bash
+ ./gradlew bootWithCCD
+ ```
+Above command starts Enforcement API + CCD & all dependencies
+
+Once successfully loaded open XUI at http://localhost:3000
+See `CftlibConfig.java` for users and login details.
 
 ---
 
