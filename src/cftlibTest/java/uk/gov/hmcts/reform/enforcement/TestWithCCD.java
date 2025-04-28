@@ -43,7 +43,7 @@ public class TestWithCCD extends CftlibTest {
     @Order(1)
     @Test
     public void createsTestCase() {
-        var r = ccdApi.startCase(idamToken, s2sToken, "PCS", "createTestApplication");
+        var r = ccdApi.startCase(idamToken, s2sToken, "Enforcement", "createTestApplication");
         var content = CaseDataContent.builder()
             .data(EnforcementCase.builder().applicantForename("Foo").build())
             .event(Event.builder().id("createTestApplication").build())

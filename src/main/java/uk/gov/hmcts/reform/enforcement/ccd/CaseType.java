@@ -17,8 +17,8 @@ public class CaseType implements CCDConfig<EnforcementCase, State, UserRole> {
     public void configure(final ConfigBuilder<EnforcementCase, State, UserRole> builder) {
         builder.setCallbackHost("http://localhost:3206");
 
-        builder.caseType("PCS", "Civil Possessions", "Possessions");
-        builder.jurisdiction("CIVIL", "Civil Possessions", "The new one");
+        builder.caseType("Enforcement", "Civil Enforcement", "Enforcement");
+        builder.jurisdiction("CIVIL", "Civil Enforcement", "The new force");
 
         var label = "Applicant Forename";
         builder.searchInputFields()
