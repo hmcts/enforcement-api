@@ -8,7 +8,7 @@ plugins {
   id 'application'
   id 'jacoco'
   id 'io.spring.dependency-management' version '1.1.7'
-  id 'org.springframework.boot' version '3.4.4'
+  id 'org.springframework.boot' version '3.4.5'
   id 'com.github.ben-manes.versions' version '0.52.0'
   id 'org.sonarqube' version '6.1.0.5360'
   id 'net.serenity-bdd.serenity-gradle-plugin' version "$serenityBddVersion"
@@ -238,7 +238,7 @@ ext {
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
   testcontainersVersion = "1.20.6"
-  springFrameworkBootVersion = "3.4.4"
+  springFrameworkBootVersion = "3.4.5"
   lombokVersion = "1.18.38"
   springSecurityVersion = "6.4.4"
   pactVersion = "4.6.17"
