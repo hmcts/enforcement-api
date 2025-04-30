@@ -91,7 +91,15 @@ Above command starts Enforcement API + CCD & all dependencies
 Once successfully loaded open XUI at http://localhost:3000
 See `CftlibConfig.java` for users and login details.
 
+The next command launches specific tests against CCD using the Spring Boot Web framework.
+
+```bash
+./gradlew cftlibTest
+```
+
+
 ---
+
 
 ## License
 

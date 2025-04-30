@@ -15,7 +15,7 @@ public class CaseType implements CCDConfig<EnforcementCase, State, UserRole> {
 
     @Override
     public void configure(final ConfigBuilder<EnforcementCase, State, UserRole> builder) {
-        builder.setCallbackHost("http://localhost:3206");
+        builder.setCallbackHost("http://localhost:4550");
 
         builder.caseType("Enforcement", "Civil Enforcement", "Enforcement");
         builder.jurisdiction("CIVIL", "Civil Enforcement", "The new force");
