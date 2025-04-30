@@ -22,12 +22,16 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
    envVariable: envVar
   ]
 }
+GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
   onPR() {
     // Skipping PACT publish on PRs until contracts are verified and CONSUMER_DEPLOY_CHECK can be added
     // enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
     setPreviewEnvVars()
+    if (githubApi.getLabelsbyPattern(env.BRANCH_NAME, "pr-values:ccd").size() > 0) {
+      enableHighLevelDataSetup()
+    }
 //    afterSuccess('smoketest:preview') {
 //      runE2eTests(env.ENVIRONMENT)
 //    }
@@ -46,6 +50,14 @@ withPipeline(type, product, component) {
 
   afterAlways('functionalTest:aat') {
     archiveFunctionalTestReports()
+  }
+
+  before('highleveldatasetup') {
+    onPR{
+      env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
+      env.CASE_API_URL = "https://enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
+    }
+    generateDefinitions(builder)
   }
 }
 
@@ -66,4 +78,11 @@ def archiveFunctionalTestReports() {
   ])
 
   archiveArtifacts allowEmptyArchive: true, artifacts: '**/report-for-functional-tests/*'
+}
+
+
+def generateDefinitions(builder) {
+  builder.gradle('generateCCDConfig')
+  sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
+  steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
 }
