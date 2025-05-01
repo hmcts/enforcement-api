@@ -28,9 +28,13 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
+  env.IDAM_S2S_AUTH_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+  loadVaultSecrets(secrets)
+  enableDbMigration('enforcement')
+
   onPR() {
     // Skipping PACT publish on PRs until contracts are verified and CONSUMER_DEPLOY_CHECK can be added
-    // enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+    //enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
     setPreviewEnvVars()
 //    afterSuccess('smoketest:preview') {
 //      runE2eTests(env.ENVIRONMENT)
@@ -39,6 +43,14 @@ withPipeline(type, product, component) {
 
   onMaster() {
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+    setAatEnvVars()
+    afterSuccess('smoketest:aat') {
+      runE2eTests(env.ENVIRONMENT)
+    }
+  }
+
+  onDemo {
+    setDemoEnvVars()
   }
 
   env.IDAM_S2S_AUTH_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
