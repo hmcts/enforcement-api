@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.pcs;
+package uk.gov.hmcts.reform.enforcement;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -25,12 +25,12 @@ public class CftlibConfig implements CFTLibConfigurer {
     @Override
     public void configure(CFTLib lib) throws Exception {
         var users = Map.of(
-            "caseworker@pcs.com", List.of("caseworker", "caseworker-civil"));
+            "caseworker@enforcement.com", List.of("caseworker", "caseworker-civil"));
 
         // Create users and roles including in idam simulator
         for (var entry : users.entrySet()) {
             lib.createIdamUser(entry.getKey(), entry.getValue().toArray(new String[0]));
-            lib.createProfile(entry.getKey(), "CIVIL", "PCS", State.Open.name());
+            lib.createProfile(entry.getKey(), "CIVIL", "Enforcement", State.Open.name());
         }
 
         lib.createRoles(
@@ -42,6 +42,6 @@ public class CftlibConfig implements CFTLibConfigurer {
         configWriter.generateAllCaseTypesToJSON(new File("build/definitions"));
 
         // Import CCD definitions
-        lib.importJsonDefinition(new File("build/definitions/PCS"));
+        lib.importJsonDefinition(new File("build/definitions/Enforcement"));
     }
 }

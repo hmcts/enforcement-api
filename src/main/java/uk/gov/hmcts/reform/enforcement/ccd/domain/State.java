@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.ccd.sdk.api.CCD;
 
 /**
- * All possible PCS case states.
+ * All possible Enforcement case states.
  * Converted into CCD states.
  */
 @RequiredArgsConstructor
@@ -18,4 +18,3 @@ public enum State {
     )
     Open;
 }
-

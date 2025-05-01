@@ -9,7 +9,7 @@ import uk.gov.hmcts.ccd.sdk.api.Permission;
 import java.util.Set;
 
 /**
- * All the different roles for a PCS case.
+ * All the different roles for a Enforcement case.
  */
 @AllArgsConstructor
 @Getter
