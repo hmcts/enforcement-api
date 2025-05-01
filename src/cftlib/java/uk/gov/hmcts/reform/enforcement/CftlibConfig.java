@@ -43,7 +43,7 @@ public class CftlibConfig implements CFTLibConfigurer {
         configWriter.generateAllCaseTypesToJSON(new File("build/definitions"));
 
         // Import CCD definitions
-//        lib.importJsonDefinition(new File("build/definitions/Enforcement"));
-        lib.importJsonDefinition(new File("build/definitions/" + CaseType.getCaseType()));
+        lib.importJsonDefinition(new File("build/definitions/Enforcement"));
     }
+
 }
