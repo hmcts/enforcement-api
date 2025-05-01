@@ -40,7 +40,6 @@ withPipeline(type, product, component) {
       println("**** Inside If clause ****** ")
       enableHighLevelDataSetup()
       println("**** About to call generateDefinitions  ****** ")
-      generateDefinitions(builder)
     }
 //    afterSuccess('smoketest:preview') {
 //      runE2eTests(env.ENVIRONMENT)
@@ -62,7 +61,7 @@ withPipeline(type, product, component) {
     archiveFunctionalTestReports()
   }
 
-  before('highleveldatasetup') {
+  before('enableHighLevelDataSetup') {
     println("**** Inside highleveldatasetup Start ****** ")
     onPR{
       env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
