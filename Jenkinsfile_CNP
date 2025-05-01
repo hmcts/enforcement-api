@@ -61,10 +61,12 @@ withPipeline(type, product, component) {
   }
 
   before('highleveldatasetup') {
+    println("**** Inside highleveldatasetup Start ****** ")
     onPR{
       env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
       env.CASE_API_URL = "https://enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
     }
+    println("**** Inside highleveldatasetup END ****** ")
     generateDefinitions(builder)
   }
 }
