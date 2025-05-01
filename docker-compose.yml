@@ -1,5 +1,3 @@
-version: '2.1'
-
 services:
   enforcement-api:
     build:
@@ -22,5 +20,43 @@ services:
       - LOGBACK_REQUIRE_THREAD
       - LOGBACK_REQUIRE_ALERT_LEVEL=false
       - LOGBACK_REQUIRE_ERROR_CODE=false
+      - ENFORCEMENT_DB_HOST=enforcement-api-db
+      - ENFORCEMENT_DB_NAME=${POSTGRES_DB}
+      - ENFORCEMENT_DB_USER_NAME=${POSTGRES_USER}
+      - ENFORCEMENT_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - IDAM_S2S_AUTH_URL=http://service-auth-provider-api:${SERVICE_AUTH_PORT}
+      - LOCATION_REF_URL=http://rd-location-ref-api-aat.service.core-compute-aat.internal
     ports:
-      - $SERVER_PORT:$SERVER_PORT
+      - ${SERVER_PORT}:${SERVER_PORT}
+    depends_on:
+      enforcement-api-db:
+        condition: service_healthy
+      service-auth-provider-api:
+        condition: service_started
+
+  enforcement-api-db:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    volumes:
+      - enforcement-api-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
+
+  service-auth-provider-api:
+    image: "hmctspublic.azurecr.io/rpe/service-auth-provider:latest"
+    ports:
+      - "${SERVICE_AUTH_PORT}:${SERVICE_AUTH_PORT}"
+    environment:
+      SERVER_PORT: ${SERVICE_AUTH_PORT}
+      AUTH_PROVIDER_SERVICE_SERVER_JWT_KEY: ${AUTH_PROVIDER_SERVICE_SERVER_JWT_KEY}
+
+volumes:
+  enforcement-api-db-data:

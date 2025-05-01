@@ -10,3 +10,11 @@ dependencies:
   - name: java
     version: 5.3.0
     repository: 'oci://hmctspublic.azurecr.io/helm'
+  - name: ccd
+    version: 9.2.2
+    repository: 'oci://hmctspublic.azurecr.io/helm'
+    condition: ccd.enabled
+  - name: xui-webapp
+    version: 1.0.30
+    repository: 'oci://hmctspublic.azurecr.io/helm'
+    condition: xui-webapp.enabled
