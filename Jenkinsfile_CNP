@@ -39,7 +39,8 @@ withPipeline(type, product, component) {
     if (githubApi.getLabelsbyPattern(env.BRANCH_NAME, "pr-values:ccd").size() > 0) {
       println("**** Inside If clause ****** ")
       enableHighLevelDataSetup()
-      println("**** About to call generateDefinitions  ****** ")
+      println("**** After calling enableHighLevelDataSetup  ****** Environment is "+ env.ENVIRONMENT)
+      generateDefinitions(builder)
     }
 //    afterSuccess('smoketest:preview') {
 //      runE2eTests(env.ENVIRONMENT)
