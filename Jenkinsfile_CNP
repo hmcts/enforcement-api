@@ -77,7 +77,7 @@ withPipeline(type, product, component) {
 
 def enableHighLevelDataSetup() {
   println("enableHighLevelDataSetup() called")
-  // See if it calls any stage, or do that manually
+  generateDefinitions(builder)
 }
 
 def setPreviewEnvVars() {
