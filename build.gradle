@@ -3,7 +3,7 @@ import org.flywaydb.gradle.task.FlywayMigrateTask
 buildscript {
   ext {
     serenityBddVersion = '4.2.22'
-    flywayVersion = "10.17.3"
+    flywayVersion = "11.8.0"
   }
   dependencies {
     classpath("org.flywaydb:flyway-database-postgresql:$flywayVersion")
