@@ -77,9 +77,7 @@ withPipeline(type, product, component) {
 
 def enableHighLevelDataSetup(builder) {
   println("enableHighLevelDataSetup() called")
-  node {
-    generateDefinitions(builder)
-  }
+  generateDefinitions(builder)
 }
 
 def setPreviewEnvVars() {
@@ -103,11 +101,15 @@ def archiveFunctionalTestReports() {
 
 
 def generateDefinitions(builder) {
-  println("1 . **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
-  builder.gradle('generateCCDConfig')
-  println("2. **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
-  sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
-  println("3. **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
-  steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
-  println("4. **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
+  node {
+    dir('api') {  // or whatever your actual working directory is
+      println("1 . **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
+      builder.gradle('generateCCDConfig')
+      println("2. **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
+      sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
+      println("3. **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
+      steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
+    }
+  }
 }
+
