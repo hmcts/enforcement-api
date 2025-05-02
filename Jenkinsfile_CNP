@@ -38,7 +38,7 @@ withPipeline(type, product, component) {
     println("**** The ENVIRONMENT values is ****** "+ env.ENVIRONMENT)
     if (githubApi.getLabelsbyPattern(env.BRANCH_NAME, "pr-values:ccd").size() > 0) {
       println("**** Inside If clause ****** ")
-      enableHighLevelDataSetup()
+      enableHighLevelDataSetup(builder)
       println("**** After calling enableHighLevelDataSetup  ****** Environment is "+ env.ENVIRONMENT)
 //      generateDefinitions(builder)
     }
