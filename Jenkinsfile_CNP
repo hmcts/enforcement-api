@@ -102,14 +102,13 @@ def archiveFunctionalTestReports() {
 
 def generateDefinitions(builder) {
   node {
-    dir('api') {  // or whatever your actual working directory is
-      println("1 . **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
-      builder.gradle('generateCCDConfig')
-      println("2. **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
-      sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
-      println("3. **** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
-      steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
-    }
+    println("1 . **** Inside generateDefinitions **** ${env.ENVIRONMENT}")
+    builder.gradle('generateCCDConfig')
+    println("2 . **** After gradle command **** ${env.ENVIRONMENT}")
+    sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
+    println("3 . **** After create-xlsx **** ${env.ENVIRONMENT}")
+    steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
   }
 }
+
 
