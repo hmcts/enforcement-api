@@ -94,6 +94,7 @@ def archiveFunctionalTestReports() {
 
 
 def generateDefinitions(builder) {
+  println("**** Inside  generateDefinitions  **** "+ env.ENVIRONMENT)
   builder.gradle('generateCCDConfig')
   sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
   steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
