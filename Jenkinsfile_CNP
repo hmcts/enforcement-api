@@ -62,7 +62,8 @@ withPipeline(type, product, component) {
     archiveFunctionalTestReports()
   }
 
-  stage('highleveldatasetup') {
+
+  before('highleveldatasetup') {
     println("**** Inside enableHighLevelDataSetup Start ****** ")
     onPR{
       env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
@@ -71,6 +72,11 @@ withPipeline(type, product, component) {
     println("**** Inside enableHighLevelDataSetup END ****** ")
     generateDefinitions(builder)
   }
+}
+
+def enableHighLevelDataSetup() {
+  println("enableHighLevelDataSetup() called")
+  // See if it calls any stage, or do that manually
 }
 
 def setPreviewEnvVars() {
