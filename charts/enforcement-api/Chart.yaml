@@ -5,7 +5,7 @@ name: enforcement-api
 home: https://github.com/hmcts/enforcement-api
 version: 0.0.6
 maintainers:
-  - name: HMCTS pcs team
+  - name: HMCTS enforcement team
 dependencies:
   - name: java
     version: 5.3.0

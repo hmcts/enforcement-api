@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @TestPropertySource(properties = {
     "security.anonymousPaths[0]=/"
 })
-@ActiveProfiles("integration")
+@ActiveProfiles("test")
 class GetWelcomeTest {
 
     private final MockMvc mockMvc;
