@@ -38,9 +38,8 @@ withPipeline(type, product, component) {
     println("**** The ENVIRONMENT values is ****** "+ env.ENVIRONMENT)
     if (githubApi.getLabelsbyPattern(env.BRANCH_NAME, "pr-values:ccd").size() > 0) {
       println("**** Inside If clause ****** ")
-      enableHighLevelDataSetup(builder)
+      enableHighLevelDataSetup()
       println("**** After calling enableHighLevelDataSetup  ****** Environment is "+ env.ENVIRONMENT)
-//      generateDefinitions(builder)
     }
 //    afterSuccess('smoketest:preview') {
 //      runE2eTests(env.ENVIRONMENT)
@@ -75,11 +74,6 @@ withPipeline(type, product, component) {
   }
 }
 
-def enableHighLevelDataSetup(builder) {
-  println("enableHighLevelDataSetup() called")
-  generateDefinitions(builder)
-}
-
 def setPreviewEnvVars() {
   // TODO: Update URL to include XUI when available
   env.TEST_E2E_URL_WEB = "https://enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
@@ -99,16 +93,10 @@ def archiveFunctionalTestReports() {
   archiveArtifacts allowEmptyArchive: true, artifacts: '**/report-for-functional-tests/*'
 }
 
-
 def generateDefinitions(builder) {
-  node {
-    println("1 . **** Inside generateDefinitions **** ${env.ENVIRONMENT}")
-    builder.gradle('generateCCDConfig')
-    println("2 . **** After gradle command **** ${env.ENVIRONMENT}")
-    sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
-    println("3 . **** After create-xlsx **** ${env.ENVIRONMENT}")
-    steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
-  }
+  builder.gradle('generateCCDConfig')
+  sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
+  steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
 }
 
 
