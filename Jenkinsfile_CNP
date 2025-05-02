@@ -62,7 +62,7 @@ withPipeline(type, product, component) {
     archiveFunctionalTestReports()
   }
 
-  before('enableHighLevelDataSetup') {
+  stage('highleveldatasetup') {
     println("**** Inside enableHighLevelDataSetup Start ****** ")
     onPR{
       env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
