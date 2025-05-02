@@ -250,7 +250,7 @@ repositories {
 ext {
   log4JVersion = "2.24.3"
   logbackVersion = "1.5.18"
-  testcontainersVersion = "1.21.0"
+  testcontainersVersion = "1.20.6"
   springFrameworkBootVersion = "3.4.5"
   lombokVersion = "1.18.38"
   springSecurityVersion = "6.4.5"
@@ -270,7 +270,6 @@ dependencies {
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.6'
 
   implementation group: 'uk.gov.service.notify', name: 'notifications-java-client', version: '5.2.1-RELEASE'
-
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.1.8'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: '5.3.2'
   implementation group: 'com.github.hmcts', name: 'ccd-client', version: '5.0.5'
@@ -323,7 +322,7 @@ bootJar {
 }
 
 // Gradle 7.x issue, workaround from: https://github.com/gradle/gradle/issues/17236#issuecomment-894768083
-project.tasks.named("processSmokeTestResources") {
+rootProject.tasks.named("processSmokeTestResources") {
   duplicatesStrategy = 'include'
 }
 
@@ -339,7 +338,6 @@ check.dependsOn cftlibTest
 rootProject.tasks.named("processContractTestResources") {
   duplicatesStrategy = 'include'
 }
-
 
 wrapper {
   distributionType = Wrapper.DistributionType.ALL
