@@ -27,7 +27,6 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
-  def githubApi = new GithubAPI(this)
   onPR() {
     println("Inside on PR ")
     println(env)
@@ -36,11 +35,6 @@ withPipeline(type, product, component) {
     // enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
     setPreviewEnvVars()
     println("**** The ENVIRONMENT values is ****** "+ env.ENVIRONMENT)
-    if (githubApi.getLabelsbyPattern(env.BRANCH_NAME, "pr-values:ccd").size() > 0) {
-      println("**** Inside If clause ****** ")
-      enableHighLevelDataSetup()
-      println("**** After calling enableHighLevelDataSetup  ****** Environment is "+ env.ENVIRONMENT)
-    }
 //    afterSuccess('smoketest:preview') {
 //      runE2eTests(env.ENVIRONMENT)
 //    }
@@ -48,6 +42,22 @@ withPipeline(type, product, component) {
 
   onMaster() {
     enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
+  }
+
+  onDemo {
+    setDemoEnvVars()
+  }
+
+  onIthc {
+    setIthcEnvVars()
+  }
+
+  onPerftest {
+    setPerftestEnvVars()
+  }
+
+  afterAlways('build') {
+    generateDefinitions(builder)
   }
 
   env.IDAM_S2S_AUTH_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
@@ -61,17 +71,6 @@ withPipeline(type, product, component) {
     archiveFunctionalTestReports()
   }
 
-
-  println("Registering before hook for highleveldatasetup")
-  before('highleveldatasetup') {
-    println("**** Inside enableHighLevelDataSetup Start ****** ")
-    onPR{
-      env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
-      env.CASE_API_URL = "https://enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
-    }
-    println("**** Inside enableHighLevelDataSetup END ****** ")
-    generateDefinitions(builder)
-  }
 }
 
 def setPreviewEnvVars() {

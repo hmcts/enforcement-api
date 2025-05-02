@@ -88,6 +88,10 @@ configurations {
   cftlibTestRuntime.extendsFrom testRuntime
 }
 
+ccd {
+  configDir = file('build/definitions')
+}
+
 tasks.withType(JavaCompile).configureEach {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
 }
