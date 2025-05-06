@@ -331,6 +331,10 @@ tasks.withType(CftlibExec).configureEach {
   environment 'SPRING_PROFILES_ACTIVE', 'dev'
 }
 
+project.tasks.named("generateCCDConfig") {
+  environment 'SPRING_PROFILES_ACTIVE', 'config-gen'
+}
+
 // Ensure we cover Cftlib dev & test with our CI checks
 check.dependsOn cftlibTest
 
