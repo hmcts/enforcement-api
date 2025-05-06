@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.ccd.sdk.CCDDefinitionGenerator;
-import uk.gov.hmcts.reform.enforcement.ccd.domain.State;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLib;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLibConfigurer;
 
@@ -30,7 +29,7 @@ public class CftlibConfig implements CFTLibConfigurer {
         // Create users and roles including in idam simulator
         for (var entry : users.entrySet()) {
             lib.createIdamUser(entry.getKey(), entry.getValue().toArray(new String[0]));
-            lib.createProfile(entry.getKey(), "CIVIL", "Enforcement", State.Open.name());
+//            lib.createProfile(entry.getKey(), "CIVIL", "Enforcement", State.Open.name());
         }
 
         lib.createRoles(
