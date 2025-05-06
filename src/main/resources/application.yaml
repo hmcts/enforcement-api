@@ -52,10 +52,16 @@ spring:
   jpa:
     properties:
       hibernate:
-        jdbc:
-          lob:
-            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        show-sql: ${SPRING_JPA_SHOW_SQL:false}
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+
+flyway:
+  noop:
+    strategy: ${FLYWAY_NOOP_STRATEGY:false}
 
 idam:
   s2s-auth:

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.authorisation.filters.ServiceAuthFilter;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
 import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 import uk.gov.service.notify.SendEmailResponse;
@@ -35,7 +36,7 @@ public class TestingSupportController {
     @PostMapping(value = "/send-email", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<SendEmailResponse> sendEmail(
         @RequestHeader(value = AUTHORIZATION, defaultValue = "DummyId") String authorisation,
-        @RequestHeader(value = "ServiceAuthorization") String serviceAuthorization,
+        @RequestHeader(value = ServiceAuthFilter.AUTHORISATION) String serviceAuthorization,
         @RequestBody EmailNotificationRequest emailRequest) {
         log.debug("Received request to send email to {}", emailRequest.getEmailAddress());
 
