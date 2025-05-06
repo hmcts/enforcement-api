@@ -4,7 +4,6 @@
 
 import uk.gov.hmcts.contino.AppPipelineDsl
 import uk.gov.hmcts.contino.GradleBuilder
-import uk.gov.hmcts.contino.GithubAPI
 
 def type = "java"
 def product = "enforcement"
@@ -28,13 +27,9 @@ GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
   onPR() {
-    println("Inside on PR ")
-    println(env)
-    println("After env printing ")
     // Skipping PACT publish on PRs until contracts are verified and CONSUMER_DEPLOY_CHECK can be added
     // enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
     setPreviewEnvVars()
-    println("**** The ENVIRONMENT values is ****** "+ env.ENVIRONMENT)
 //    afterSuccess('smoketest:preview') {
 //      runE2eTests(env.ENVIRONMENT)
 //    }
@@ -57,7 +52,6 @@ withPipeline(type, product, component) {
   }
 
   afterAlways('build') {
-    println("******* I am going to call  generateDefinitions ********")
     generateDefinitions(builder)
   }
 
