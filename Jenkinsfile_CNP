@@ -65,6 +65,22 @@ withPipeline(type, product, component) {
     archiveFunctionalTestReports()
   }
 
+  onDemo {
+    setDemoEnvVars()
+  }
+
+  onIthc {
+    setIthcEnvVars()
+  }
+
+  onPerftest {
+    setPerftestEnvVars()
+  }
+
+  afterAlways('build') {
+    generateDefinitions(builder)
+  }
+
   afterAlways('functionalTest:aat') {
     archiveFunctionalTestReports()
   }
@@ -87,4 +103,22 @@ def archiveFunctionalTestReports() {
   ])
 
   archiveArtifacts allowEmptyArchive: true, artifacts: '**/report-for-functional-tests/*'
+}
+
+def setDemoEnvVars() {
+  env.ENVIRONMENT= "demo"
+}
+
+def setIthcEnvVars() {
+  env.ENVIRONMENT= "ithc"
+}
+
+def setPerftestEnvVars() {
+  env.ENVIRONMENT= "perftest"
+}
+
+def generateDefinitions(builder) {
+  builder.gradle('generateCCDConfig')
+  sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
+  steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
 }

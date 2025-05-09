@@ -339,7 +339,6 @@ rootProject.tasks.named("processContractTestResources") {
   duplicatesStrategy = 'include'
 }
 
-
 wrapper {
   distributionType = Wrapper.DistributionType.ALL
 }
