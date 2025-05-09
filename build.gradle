@@ -322,7 +322,7 @@ bootJar {
 }
 
 // Gradle 7.x issue, workaround from: https://github.com/gradle/gradle/issues/17236#issuecomment-894768083
-rootProject.tasks.named("processSmokeTestResources") {
+project.tasks.named("processSmokeTestResources") {
   duplicatesStrategy = 'include'
 }
 
@@ -338,6 +338,7 @@ check.dependsOn cftlibTest
 rootProject.tasks.named("processContractTestResources") {
   duplicatesStrategy = 'include'
 }
+
 
 wrapper {
   distributionType = Wrapper.DistributionType.ALL
