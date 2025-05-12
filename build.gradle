@@ -220,7 +220,9 @@ sonarqube {
     property "sonar.projectKey", "uk.gov.hmcts.reform:enforcement-api"
     property "sonar.coverage.exclusions", "**/config/**/*Configuration.java," +
       "**/*Constants.java," +
-      "**/model/*.java," + "**/uk/gov/hmcts/reform/enforcement/Application.java"
+      "**/model/*.java,"+
+      "**/uk/gov/hmcts/reform/enforcement/Application.java" +
+      "**/uk/gov/hmcts/reform/pcs/ccd/config/HighLevelDataSetupApp.java"
   }
 }
 
@@ -288,6 +290,14 @@ dependencies {
 
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.1'
 
+  implementation(group: 'com.github.hmcts', name: 'befta-fw', version: '8.10.1') {
+    exclude group: 'org.apache.commons', module: 'commons-compress'
+    exclude group: 'com.google.guava', module: 'guava'
+    exclude group: 'org.apache.poi', module: 'poi-ooxml'
+    exclude group: 'org.apache.poi', module: 'poi'
+    exclude group: 'com.launchdarkly', module: 'launchdarkly-java-server-sdk'
+  }
+
   implementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: serenityBddVersion
   implementation group: 'net.serenity-bdd', name: 'serenity-core', version: serenityBddVersion
   testImplementation group: 'net.serenity-bdd', name: 'serenity-junit5', version: serenityBddVersion
@@ -305,6 +315,8 @@ dependencies {
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
 
+  developmentOnly 'com.h2database:h2'
+
   // Allow fast reloading during dev; recompile a class to trigger fast reload + definition reimport.
   cftlibImplementation 'org.springframework.boot:spring-boot-devtools'
 }
@@ -321,6 +333,10 @@ bootJar {
   }
 }
 
+project.tasks.named("generateCCDConfig") {
+  environment 'SPRING_PROFILES_ACTIVE', 'config-gen'
+}
+
 // Gradle 7.x issue, workaround from: https://github.com/gradle/gradle/issues/17236#issuecomment-894768083
 project.tasks.named("processSmokeTestResources") {
   duplicatesStrategy = 'include'
@@ -330,6 +346,12 @@ tasks.withType(CftlibExec).configureEach {
   group = 'ccd tasks'
   authMode = AuthMode.Local
   environment 'SPRING_PROFILES_ACTIVE', 'dev'
+}
+
+tasks.register('highLevelDataSetup', JavaExec) {
+  mainClass.set("uk.gov.hmcts.reform.enforcement.ccd.config.HighLevelDataSetupApp")
+  classpath += sourceSets.main.runtimeClasspath
+  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
 }
 
 // Ensure we cover Cftlib dev & test with our CI checks
