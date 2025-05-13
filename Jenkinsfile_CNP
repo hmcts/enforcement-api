@@ -3,6 +3,7 @@
 @Library("Infrastructure")
 
 import uk.gov.hmcts.contino.AppPipelineDsl
+import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
 def product = "enforcement"
@@ -23,6 +24,9 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
+
+GradleBuilder builder = new GradleBuilder(this, product)
+
 withPipeline(type, product, component) {
   onPR() {
     // Skipping PACT publish on PRs until contracts are verified and CONSUMER_DEPLOY_CHECK can be added
@@ -42,6 +46,22 @@ withPipeline(type, product, component) {
 
   afterAlways('functionalTest:preview') {
     archiveFunctionalTestReports()
+  }
+
+  onDemo {
+    setDemoEnvVars()
+  }
+
+  onIthc {
+    setIthcEnvVars()
+  }
+
+  onPerftest {
+    setPerftestEnvVars()
+  }
+
+  afterAlways('build') {
+    generateDefinitions(builder)
   }
 
   afterAlways('functionalTest:aat') {
@@ -66,4 +86,22 @@ def archiveFunctionalTestReports() {
   ])
 
   archiveArtifacts allowEmptyArchive: true, artifacts: '**/report-for-functional-tests/*'
+}
+
+def setDemoEnvVars() {
+  env.ENVIRONMENT= "demo"
+}
+
+def setIthcEnvVars() {
+  env.ENVIRONMENT= "ithc"
+}
+
+def setPerftestEnvVars() {
+  env.ENVIRONMENT= "perftest"
+}
+
+def generateDefinitions(builder) {
+  builder.gradle('generateCCDConfig')
+  sh "./bin/create-xlsx.sh ${env.ENVIRONMENT}"
+  steps.archiveArtifacts artifacts: "build/definitions/*.xlsx"
 }
