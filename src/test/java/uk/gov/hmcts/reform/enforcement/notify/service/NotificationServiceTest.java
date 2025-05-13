@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.enforcement.notify.service;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
@@ -39,8 +39,14 @@ class NotificationServiceTest {
     @Mock
     private NotificationClient notificationClient;
 
-    @InjectMocks
     private NotificationService notificationService;
+
+    private static final long STATUS_CHECK_DELAY = 100L;
+
+    @BeforeEach
+    void setUp() {
+        notificationService = new NotificationService(notificationClient, STATUS_CHECK_DELAY);
+    }
 
     @Test
     void testSendEmailSuccess() throws NotificationClientException {
