@@ -6,15 +6,22 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import uk.gov.hmcts.reform.enforcement.config.AsyncConfiguration;
 import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.SendEmailResponse;
+import uk.gov.service.notify.Notification;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
@@ -26,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@SpringJUnitConfig(AsyncConfiguration.class)
 class NotificationServiceTest {
 
     @Mock
@@ -91,5 +99,58 @@ class NotificationServiceTest {
 
         verify(notificationClient)
                 .sendEmail(anyString(), anyString(), anyMap(), anyString());
+    }
+
+    @Test
+    void testCheckNotificationStatusDelivered() throws NotificationClientException, 
+            InterruptedException, ExecutionException, TimeoutException {
+        String notificationId = UUID.randomUUID().toString();
+        Notification notification = mock(Notification.class);
+        
+        when(notification.getStatus()).thenReturn("delivered");
+        when(notificationClient.getNotificationById(notificationId)).thenReturn(notification);
+
+        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId);
+        Notification result = future.get(6, TimeUnit.SECONDS);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getStatus()).isEqualTo("delivered");
+        verify(notificationClient).getNotificationById(notificationId);
+    }
+
+    @Test
+    void testCheckNotificationStatusPending() throws NotificationClientException, 
+            InterruptedException, ExecutionException, TimeoutException {
+        String notificationId = UUID.randomUUID().toString();
+        Notification notification = mock(Notification.class);
+
+        when(notification.getStatus()).thenReturn("pending");
+        when(notificationClient.getNotificationById(notificationId)).thenReturn(notification);
+
+        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId);
+        Notification result = future.get(6, TimeUnit.SECONDS);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getStatus()).isEqualTo("pending");
+        verify(notificationClient).getNotificationById(notificationId);
+    }
+
+    @Test
+    void testCheckNotificationStatusError() throws NotificationClientException {
+        String notificationId = UUID.randomUUID().toString();
+        when(notificationClient.getNotificationById(notificationId))
+            .thenThrow(new NotificationClientException("Failed to fetch notification status"));
+
+        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId);
+        
+        assertThatThrownBy(() -> future.get(6, TimeUnit.SECONDS))
+            .isInstanceOf(ExecutionException.class)
+            .satisfies(thrown -> {
+                assertThat(thrown.getCause())
+                    .isInstanceOf(NotificationClientException.class)
+                    .hasMessage("Failed to fetch notification status");
+            });
+
+        verify(notificationClient).getNotificationById(notificationId);
     }
 }
