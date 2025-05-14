@@ -311,6 +311,7 @@ application {
 
 bootJar {
   archiveFileName = "enforcement-api.jar"
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
