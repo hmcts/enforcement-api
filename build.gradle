@@ -220,7 +220,7 @@ sonarqube {
     property "sonar.coverage.exclusions", "**/config/**/*Configuration.java," +
       "**/*Constants.java," +
       "**/model/*.java,"+
-      "**/uk/gov/hmcts/reform/enforcement/Application.java" +
+      "**/uk/gov/hmcts/reform/enforcement/Application.java," +
       "**/uk/gov/hmcts/reform/enforcement/ccd/config/HighLevelDataSetupApp.java"
   }
 }
