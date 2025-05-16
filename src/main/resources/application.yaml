@@ -69,6 +69,7 @@ idam:
 
 notify:
   api-key: ${ENFORCEMENT_NOTIFY_API_KEY:AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA}
+  status-check-delay-millis: ${NOTIFY_STATUS_CHECK_DELAY:3000}
 
 azure:
   application-insights:
