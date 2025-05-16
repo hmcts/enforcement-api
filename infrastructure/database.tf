@@ -51,3 +51,15 @@ resource "azurerm_key_vault_secret" "POSTGRES_HOST" {
   value        = module.postgresql.fqdn
   key_vault_id = data.azurerm_key_vault.enforcement_key_vault.id
 }
+
+resource "azurerm_key_vault_secret" "POSTGRES_DATABASE" {
+  name         = "${var.component}-POSTGRES-DATABASE"
+  value        = var.product
+  key_vault_id = data.azurerm_key_vault.enforcement_key_vault.id
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES_PORT" {
+  name         = "${var.component}-POSTGRES-PORT"
+  value        = "5432"
+  key_vault_id = data.azurerm_key_vault.enforcement_key_vault.id
+}
