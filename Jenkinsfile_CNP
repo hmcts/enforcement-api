@@ -100,6 +100,11 @@ def archiveFunctionalTestReports() {
   archiveArtifacts allowEmptyArchive: true, artifacts: '**/report-for-functional-tests/*'
 }
 
+def setAatEnvVars() {
+  env.TEST_E2E_URL_WEB = "https://manage-case.aat.platform.hmcts.net/"
+  env.ENVIRONMENT= "aat"
+}
+
 def setDemoEnvVars() {
   env.ENVIRONMENT= "demo"
 }
