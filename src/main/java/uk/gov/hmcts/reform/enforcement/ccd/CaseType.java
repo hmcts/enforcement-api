@@ -7,18 +7,41 @@ import uk.gov.hmcts.reform.enforcement.ccd.domain.EnforcementCase;
 import uk.gov.hmcts.reform.enforcement.ccd.domain.State;
 import uk.gov.hmcts.reform.enforcement.ccd.domain.UserRole;
 
+import static java.lang.System.getenv;
+import static java.util.Optional.ofNullable;
+
 /**
  * Setup some common possessions case type configuration.
  */
 @Component
 public class CaseType implements CCDConfig<EnforcementCase, State, UserRole> {
+    private static final String CASE_TYPE_ID = "Enforcement";
+    private static final String CASE_TYPE_NAME = "Civil Enforcement";
+    private static final String CASE_TYPE_DESCRIPTION = "Civil Enforcement Case Type";
+    private static final String JURISDICTION_ID = "CIVIL";
+    private static final String JURISDICTION_NAME = "Civil Enforcement";
+    private static final String JURISDICTION_DESCRIPTION = "Civil Enforcement Jurisdiction";
+
+    public static String getCaseType() {
+        return withChangeId(CASE_TYPE_ID, "-");
+    }
+
+    public static String getCaseTypeName() {
+        return withChangeId(CASE_TYPE_NAME, " ");
+    }
+
+    private static String withChangeId(String base, String separator) {
+        return ofNullable(getenv().get("CHANGE_ID"))
+            .map(changeId -> base + separator + changeId)
+            .orElse(base);
+    }
 
     @Override
     public void configure(final ConfigBuilder<EnforcementCase, State, UserRole> builder) {
-        builder.setCallbackHost("http://localhost:4550");
+        builder.setCallbackHost(getenv().getOrDefault("CASE_API_URL","http://localhost:4550"));
 
-        builder.caseType("Enforcement", "Civil Enforcement", "Enforcement");
-        builder.jurisdiction("CIVIL", "Civil Enforcement", "The new force");
+        builder.caseType(getCaseType(), getCaseTypeName(), CASE_TYPE_DESCRIPTION);
+        builder.jurisdiction(JURISDICTION_ID, JURISDICTION_NAME, JURISDICTION_DESCRIPTION);
 
         var label = "Applicant Forename";
         builder.searchInputFields()

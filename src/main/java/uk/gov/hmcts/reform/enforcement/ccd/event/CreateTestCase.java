@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.enforcement.ccd.event;
 
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.ccd.sdk.api.CCDConfig;
 import uk.gov.hmcts.ccd.sdk.api.CaseDetails;
@@ -11,7 +10,6 @@ import uk.gov.hmcts.reform.enforcement.ccd.domain.EnforcementCase;
 import uk.gov.hmcts.reform.enforcement.ccd.domain.State;
 import uk.gov.hmcts.reform.enforcement.ccd.domain.UserRole;
 
-@Profile("dev") // Non-prod event
 @Component
 public class CreateTestCase implements CCDConfig<EnforcementCase, State, UserRole> {
     @Override

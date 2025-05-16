@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.Event;
+import uk.gov.hmcts.reform.enforcement.ccd.CaseType;
 import uk.gov.hmcts.reform.enforcement.ccd.domain.EnforcementCase;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.rse.ccd.lib.test.CftlibTest;
@@ -41,14 +42,14 @@ public class TestWithCCD extends CftlibTest {
     @Order(1)
     @Test
     public void createsTestCase() {
-        var r = ccdApi.startCase(idamToken, s2sToken, "Enforcement", "createTestApplication");
+        var r = ccdApi.startCase(idamToken, s2sToken, CaseType.getCaseType(), "createTestApplication");
         var content = CaseDataContent.builder()
             .data(EnforcementCase.builder().applicantForename("Foo").build())
             .event(Event.builder().id("createTestApplication").build())
             .eventToken(r.getToken())
             .build();
         caseDetails = ccdApi.submitForCaseworker(idamToken, s2sToken, userId,
-                                                 "CIVIL", "Enforcement", false, content);
+                                                 "CIVIL", CaseType.getCaseType(), false, content);
         assertThat(caseDetails.getId()).isNotNull();
     }
 }
