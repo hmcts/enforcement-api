@@ -11,24 +11,24 @@ public enum NotificationStatus {
     PENDING_SCHEDULE("pending-schedule"), 
     SUBMITTED("submitted");
 
-    private final String value;
+    private final String apiValue;
 
-    NotificationStatus(String value) {
-        this.value = value;
+    NotificationStatus(String apiValue) {
+        this.apiValue = apiValue;
     }
 
-    public String getValue() {
-        return value;
+    public String getApiValue() {
+        return apiValue;
     }
 
     @Override
     public String toString() {
-        return value;
+        return apiValue;
     }
 
     public static NotificationStatus fromString(String status) {
         for (NotificationStatus notificationStatus : NotificationStatus.values()) {
-            if (notificationStatus.value.equalsIgnoreCase(status)) {
+            if (notificationStatus.apiValue.equalsIgnoreCase(status)) {
                 return notificationStatus;
             }
         }
