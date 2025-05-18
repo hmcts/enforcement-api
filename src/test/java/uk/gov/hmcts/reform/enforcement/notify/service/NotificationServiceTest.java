@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.enforcement.notify.domain.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
+import uk.gov.hmcts.reform.enforcement.notify.model.NotificationType;
 import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
@@ -115,7 +116,7 @@ class NotificationServiceTest {
     @DisplayName("Should create case notification properly")
     void shouldCreateCaseNotificationProperly() {
         String recipient = "test@example.com";
-        String type = "Email";
+        NotificationType type = NotificationType.EMAIL;
         UUID caseId = UUID.randomUUID();
         
         CaseNotification caseNotification = new CaseNotification();
