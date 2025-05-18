@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.enforcement.notify.domain.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
+import uk.gov.hmcts.reform.enforcement.notify.model.NotificationType;
 import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
 import uk.gov.service.notify.NotificationClient;
 import uk.gov.service.notify.NotificationClientException;
@@ -48,7 +49,7 @@ public class NotificationService {
 
         CaseNotification caseNotification = createCaseNotification(
             emailRequest.getEmailAddress(), 
-            "Email", 
+            NotificationType.EMAIL, 
             UUID.randomUUID()
         );
 
@@ -97,7 +98,7 @@ public class NotificationService {
         });
     }
 
-    CaseNotification createCaseNotification(String recipient, String type, UUID caseId) {
+    CaseNotification createCaseNotification(String recipient, NotificationType type, UUID caseId) {
         CaseNotification toSaveNotification = new CaseNotification();
         toSaveNotification.setCaseId(caseId);
         toSaveNotification.setStatus(NotificationStatus.PENDING_SCHEDULE);
