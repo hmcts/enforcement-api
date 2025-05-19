@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.enforcement.notify.domain;
+package uk.gov.hmcts.reform.enforcement.notify.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

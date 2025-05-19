@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EntityScan("uk.gov.hmcts.reform.enforcement.notify.domain")
+@EntityScan("uk.gov.hmcts.reform.enforcement.notify.entities")
 @EnableJpaRepositories("uk.gov.hmcts.reform.enforcement.notify.repository")
 @EnableTransactionManagement
 public class JpaConfig {
