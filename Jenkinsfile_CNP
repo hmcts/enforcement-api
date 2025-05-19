@@ -4,6 +4,7 @@
 
 import uk.gov.hmcts.contino.AppPipelineDsl
 import uk.gov.hmcts.contino.GradleBuilder
+import uk.gov.hmcts.contino.GithubAPI
 
 def type = "java"
 def product = "enforcement"
@@ -24,10 +25,10 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
-
 GradleBuilder builder = new GradleBuilder(this, product)
 
 withPipeline(type, product, component) {
+  def githubApi = new GithubAPI(this)
   env.IDAM_S2S_AUTH_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
   loadVaultSecrets(secrets)
   enableDbMigration(product)
@@ -36,9 +37,9 @@ withPipeline(type, product, component) {
     // Skipping PACT publish on PRs until contracts are verified and CONSUMER_DEPLOY_CHECK can be added
     //enablePactAs([AppPipelineDsl.PactRoles.CONSUMER])
     setPreviewEnvVars()
-//    afterSuccess('smoketest:preview') {
-//      runE2eTests(env.ENVIRONMENT)
-//    }
+    if (githubApi.getLabelsbyPattern(env.BRANCH_NAME, "pr-values:ccd").size() > 0) {
+      enableHighLevelDataSetup()
+    }
   }
 
   onMaster() {
@@ -53,17 +54,6 @@ withPipeline(type, product, component) {
     setDemoEnvVars()
   }
 
-  env.IDAM_S2S_AUTH_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
-  loadVaultSecrets(secrets)
-
-  afterAlways('functionalTest:preview') {
-    archiveFunctionalTestReports()
-  }
-
-  onDemo {
-    setDemoEnvVars()
-  }
-
   onIthc {
     setIthcEnvVars()
   }
@@ -72,8 +62,16 @@ withPipeline(type, product, component) {
     setPerftestEnvVars()
   }
 
-  afterAlways('build') {
+  before('highleveldatasetup') {
+    onPR{
+      env.DEFINITION_STORE_URL_BASE = "https://ccd-definition-store-enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
+      env.CASE_API_URL = "https://enforcement-api-pr-${CHANGE_ID}.preview.platform.hmcts.net"
+    }
     generateDefinitions(builder)
+  }
+
+  afterAlways('functionalTest:preview') {
+    archiveFunctionalTestReports()
   }
 
   afterAlways('functionalTest:aat') {
