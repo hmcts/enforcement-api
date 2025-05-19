@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.ccd.sdk.CCDDefinitionGenerator;
+import uk.gov.hmcts.reform.enforcement.ccd.CaseType;
 import uk.gov.hmcts.reform.enforcement.ccd.domain.State;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLib;
 import uk.gov.hmcts.rse.ccd.lib.api.CFTLibConfigurer;
@@ -42,6 +43,6 @@ public class CftlibConfig implements CFTLibConfigurer {
         configWriter.generateAllCaseTypesToJSON(new File("build/definitions"));
 
         // Import CCD definitions
-        lib.importJsonDefinition(new File("build/definitions/Enforcement"));
+        lib.importJsonDefinition(new File("build/definitions/" + CaseType.getCaseType()));
     }
 }
