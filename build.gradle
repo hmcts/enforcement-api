@@ -335,10 +335,6 @@ bootJar {
   }
 }
 
-tasks.withType(AbstractCopyTask).configureEach {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
 project.tasks.named("generateCCDConfig") {
   environment 'SPRING_PROFILES_ACTIVE', 'config-gen'
 }
@@ -365,6 +361,10 @@ check.dependsOn cftlibTest
 
 rootProject.tasks.named("processContractTestResources") {
   duplicatesStrategy = 'include'
+}
+
+tasks.withType(AbstractCopyTask).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 wrapper {
