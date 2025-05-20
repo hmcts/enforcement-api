@@ -306,7 +306,7 @@ dependencies {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.4.5'
+  testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.5.0'
 
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: '4.6.17'
   contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.12.2')
