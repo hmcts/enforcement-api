@@ -328,10 +328,15 @@ application {
 
 bootJar {
   archiveFileName = "enforcement-api.jar"
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
   }
+}
+
+tasks.withType(AbstractCopyTask).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 project.tasks.named("generateCCDConfig") {
