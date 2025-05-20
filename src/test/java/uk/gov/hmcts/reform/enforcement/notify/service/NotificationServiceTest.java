@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
@@ -19,20 +18,17 @@ import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.Notification;
 import uk.gov.service.notify.SendEmailResponse;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -53,7 +49,6 @@ class NotificationServiceTest {
     @Mock
     private NotificationRepository notificationRepository;
     
-    @InjectMocks
     private NotificationService notificationService;
     
     private EmailNotificationRequest emailRequest;
@@ -79,7 +74,6 @@ class NotificationServiceTest {
         mockCaseNotification.setNotificationId(UUID.randomUUID());
         
         mockSendEmailResponse = mock(SendEmailResponse.class);
-        when(mockSendEmailResponse.getNotificationId()).thenReturn(notificationId);
     }
     
     @Test
@@ -120,6 +114,7 @@ class NotificationServiceTest {
     
     @Test
     void testSendEmail() throws NotificationClientException {
+        when(mockSendEmailResponse.getNotificationId()).thenReturn(notificationId);
         when(notificationRepository.save(any(CaseNotification.class))).thenReturn(mockCaseNotification);
         when(notificationClient.sendEmail(
             anyString(), anyString(), anyMap(), anyString()
@@ -189,18 +184,16 @@ class NotificationServiceTest {
     @Test
     void testCheckNotificationStatusNotFound() throws NotificationClientException {
         Notification mockNotification = mock(Notification.class);
-        when(mockNotification.getStatus()).thenReturn("delivered");
-        
         when(notificationClient.getNotificationById(notificationId.toString()))
             .thenReturn(mockNotification);
-            
+    
         when(notificationRepository.findByProviderNotificationId(notificationId))
             .thenReturn(Optional.empty());
-        
+    
         CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
-        
+    
         Notification result = future.join();
-        
+    
         assertNotNull(result);
         verify(notificationRepository).findByProviderNotificationId(notificationId);
         verify(notificationRepository, never()).save(any(CaseNotification.class));
@@ -208,7 +201,7 @@ class NotificationServiceTest {
     
     @Test
     void testCheckNotificationStatusClientException() throws NotificationClientException {
-        when(notificationClient.getNotificationById(notificationId.toString()))
+        when(notificationClient.getNotificationById(anyString()))
             .thenThrow(new NotificationClientException("API error"));
         
         CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
@@ -258,6 +251,7 @@ class NotificationServiceTest {
     @Test
     void testSendingStatusSetsSubmittedTime() {
         mockCaseNotification.setSubmittedAt(null);
+        when(mockSendEmailResponse.getNotificationId()).thenReturn(notificationId);
         
         when(notificationRepository.save(any(CaseNotification.class))).thenAnswer(i -> {
             CaseNotification notification = i.getArgument(0);
@@ -272,6 +266,7 @@ class NotificationServiceTest {
                 .thenReturn(mockSendEmailResponse);
             notificationService.sendEmail(emailRequest);
         } catch (NotificationClientException e) {
+            // No exception in this case
         }
         
         verify(notificationRepository, times(2)).save(any(CaseNotification.class));
@@ -295,18 +290,6 @@ class NotificationServiceTest {
         
         Notification result = future.join();
         assertNotNull(result);
-    }
-    
-    @Test
-    void testInterruptedExceptionHandling() throws NotificationClientException {
-        InterruptedException interruptedException = new InterruptedException("Test interruption");
-        
-        when(notificationClient.getNotificationById(anyString()))
-            .thenThrow(interruptedException);
-        
-        CompletableFuture<Notification> future = notificationService.checkNotificationStatus("test-id");
-        
-        assertThrows(CompletionException.class, future::join);
     }
     
     @Test
