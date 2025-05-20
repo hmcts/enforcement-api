@@ -3,7 +3,7 @@ import uk.gov.hmcts.rse.CftlibExec
 
 buildscript {
   ext {
-    serenityBddVersion = '4.2.23'
+    serenityBddVersion = '4.2.26'
   }
 }
 
