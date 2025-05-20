@@ -3,11 +3,11 @@ package uk.gov.hmcts.reform.enforcement.config;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@EntityScan("uk.gov.hmcts.reform.enforcement.notify.entities")
-@EnableJpaRepositories("uk.gov.hmcts.reform.enforcement.notify.repository")
-@EnableTransactionManagement
+@EnableJpaRepositories(basePackages = "uk.gov.hmcts.reform.enforcement.notify.repository")
+@EntityScan(basePackages = {
+    "uk.gov.hmcts.reform.enforcement.notify.entities"
+})
 public class JpaConfig {
 }
