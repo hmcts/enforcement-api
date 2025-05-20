@@ -34,8 +34,17 @@ public class TestDatabaseConfig {
         em.setJpaVendorAdapter(vendorAdapter);
         
         Properties properties = new Properties();
+        // Set explicit Hibernate properties
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
         properties.setProperty("hibernate.hbm2ddl.auto", "create-drop");
+        properties.setProperty("hibernate.connection.url", "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1");
+        properties.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
+        properties.setProperty("hibernate.connection.username", "sa");
+        properties.setProperty("hibernate.connection.password", "");
+        properties.setProperty("hibernate.archive.autodetection", "class");
+        properties.setProperty("hibernate.show_sql", "true");
+        properties.setProperty("hibernate.format_sql", "true");
+        
         em.setJpaProperties(properties);
 
         return em;

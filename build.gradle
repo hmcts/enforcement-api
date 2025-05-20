@@ -35,10 +35,6 @@ java {
   }
 }
 
-tasks.withType(Copy).configureEach {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
 sourceSets {
   functionalTest {
     java {
@@ -110,6 +106,7 @@ tasks.withType(Test).configureEach {
   testLogging {
     exceptionFormat = 'full'
   }
+  systemProperty 'spring.profiles.active', 'test'
 }
 
 test {
@@ -331,7 +328,6 @@ application {
 
 bootJar {
   archiveFileName = "enforcement-api.jar"
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
@@ -342,22 +338,6 @@ project.tasks.named("generateCCDConfig") {
   environment 'SPRING_PROFILES_ACTIVE', 'config-gen'
 }
 
-tasks.named('distTar') {
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-tasks.named('distZip') {
-  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-rootProject.tasks.named("processResources") {
-  duplicatesStrategy = 'include'
-}
-
-rootProject.tasks.named("processIntegrationTestResources") {
-  duplicatesStrategy = 'include'
-}
-
 // Gradle 7.x issue, workaround from: https://github.com/gradle/gradle/issues/17236#issuecomment-894768083
 project.tasks.named("processSmokeTestResources") {
   duplicatesStrategy = 'include'
@@ -366,7 +346,7 @@ project.tasks.named("processSmokeTestResources") {
 tasks.withType(CftlibExec).configureEach {
   group = 'ccd tasks'
   authMode = AuthMode.Local
-  environment 'SPRING_PROFILES_ACTIVE', 'dev'
+  environment 'SPRING_PROFILES_ACTIVE', 'dev,test'
 }
 
 tasks.register('highLevelDataSetup', JavaExec) {
