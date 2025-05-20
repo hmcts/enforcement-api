@@ -3,7 +3,7 @@ import uk.gov.hmcts.rse.CftlibExec
 
 buildscript {
   ext {
-    serenityBddVersion = '4.2.23'
+    serenityBddVersion = '4.2.26'
   }
 }
 
@@ -308,7 +308,7 @@ dependencies {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
-  testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.4.5'
+  testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.5.0'
   testImplementation 'com.h2database:h2'
 
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: '4.6.17'
