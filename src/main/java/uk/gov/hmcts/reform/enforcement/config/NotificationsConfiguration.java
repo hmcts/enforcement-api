@@ -19,7 +19,7 @@ public class NotificationsConfiguration {
         return new NotificationClient(apiKey);
     }
 
-    @Bean(name = "notifyTaskExecutor")  // Changed name to avoid conflict
+    @Bean
     public Executor notifyTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(2);

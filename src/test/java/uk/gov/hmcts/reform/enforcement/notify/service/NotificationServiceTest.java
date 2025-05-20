@@ -25,7 +25,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -91,10 +91,10 @@ class NotificationServiceTest {
         CaseNotification result = notificationService.createCaseNotification(recipient, type, caseId);
         
         assertNotNull(result);
-        assertEquals(caseId, result.getCaseId());
-        assertEquals(type, result.getType());
-        assertEquals(recipient, result.getRecipient());
-        assertEquals(NotificationStatus.PENDING_SCHEDULE, result.getStatus());
+        assertThat(result.getCaseId()).isEqualTo(caseId);
+        assertThat(result.getType()).isEqualTo(type);
+        assertThat(result.getRecipient()).isEqualTo(recipient);
+        assertThat(result.getStatus()).isEqualTo(NotificationStatus.PENDING_SCHEDULE);
         verify(notificationRepository).save(any(CaseNotification.class));
     }
     
@@ -109,7 +109,7 @@ class NotificationServiceTest {
         NotificationException exception = assertThrows(NotificationException.class, () -> 
             notificationService.createCaseNotification(recipient, type, caseId));
         
-        assertEquals("Failed to save Case Notification.", exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo("Failed to save Case Notification.");
     }
     
     @Test
@@ -135,12 +135,12 @@ class NotificationServiceTest {
         verify(notificationRepository, times(2)).save(notificationCaptor.capture());
         
         CaseNotification firstSave = notificationCaptor.getAllValues().get(0);
-        assertEquals(NotificationType.EMAIL, firstSave.getType());
-        assertEquals(emailRequest.getEmailAddress(), firstSave.getRecipient());
+        assertThat(firstSave.getType()).isEqualTo(NotificationType.EMAIL);
+        assertThat(firstSave.getRecipient()).isEqualTo(emailRequest.getEmailAddress());
         
         CaseNotification secondSave = notificationCaptor.getAllValues().get(1);
-        assertEquals(NotificationStatus.SUBMITTED, secondSave.getStatus());
-        assertEquals(notificationId, secondSave.getProviderNotificationId());
+        assertThat(secondSave.getStatus()).isEqualTo(NotificationStatus.SUBMITTED);
+        assertThat(secondSave.getProviderNotificationId()).isEqualTo(notificationId);
     }
     
     @Test
@@ -153,7 +153,7 @@ class NotificationServiceTest {
         NotificationException exception = assertThrows(NotificationException.class, () -> 
             notificationService.sendEmail(emailRequest));
         
-        assertEquals("Email failed to send, please try again.", exception.getMessage());
+        assertThat(exception.getMessage()).isEqualTo("Email failed to send, please try again.");
         
         verify(notificationRepository, times(2)).save(any(CaseNotification.class));
     }
@@ -228,7 +228,7 @@ class NotificationServiceTest {
         verify(notificationRepository).save(captor.capture());
         
         CaseNotification savedNotification = captor.getValue();
-        assertEquals(NotificationStatus.DELIVERED, savedNotification.getStatus());
+        assertThat(savedNotification.getStatus()).isEqualTo(NotificationStatus.DELIVERED);
     }
     
     @Test
@@ -311,6 +311,6 @@ class NotificationServiceTest {
         verify(notificationRepository).save(captor.capture());
         
         CaseNotification savedNotification = captor.getValue();
-        assertEquals(NotificationStatus.DELIVERED, savedNotification.getStatus());
+        assertThat(savedNotification.getStatus()).isEqualTo(NotificationStatus.DELIVERED);
     }
 }

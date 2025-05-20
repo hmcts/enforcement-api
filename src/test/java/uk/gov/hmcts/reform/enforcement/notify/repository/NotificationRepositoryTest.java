@@ -12,8 +12,7 @@ import uk.gov.hmcts.reform.enforcement.notify.model.NotificationType;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -40,10 +39,10 @@ class NotificationRepositoryTest {
         
         Optional<CaseNotification> found = repository.findByProviderNotificationId(providerNotificationId);
         
-        assertTrue(found.isPresent());
-        assertEquals(providerNotificationId, found.get().getProviderNotificationId());
-        assertEquals(caseId, found.get().getCaseId());
-        assertEquals(NotificationStatus.SUBMITTED, found.get().getStatus());
+        assertThat(found).isPresent();
+        assertThat(found.get().getProviderNotificationId()).isEqualTo(providerNotificationId);
+        assertThat(found.get().getCaseId()).isEqualTo(caseId);
+        assertThat(found.get().getStatus()).isEqualTo(NotificationStatus.SUBMITTED);
     }
     
     @Test
@@ -51,6 +50,6 @@ class NotificationRepositoryTest {
         
         Optional<CaseNotification> found = repository.findByProviderNotificationId(UUID.randomUUID());
         
-        assertTrue(found.isEmpty());
+        assertThat(found).isEmpty();
     }
 }

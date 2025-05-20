@@ -26,12 +26,12 @@ public enum NotificationStatus {
         return apiValue;
     }
 
-    public static NotificationStatus fromString(String status) {
+    public static NotificationStatus fromApiValue(String apiValue) {
         for (NotificationStatus notificationStatus : NotificationStatus.values()) {
-            if (notificationStatus.apiValue.equalsIgnoreCase(status)) {
+            if (notificationStatus.apiValue.equalsIgnoreCase(apiValue)) {
                 return notificationStatus;
             }
         }
-        throw new IllegalArgumentException("Unknown status: " + status);
+        throw new IllegalArgumentException("Unknown status: " + apiValue);
     }
 }

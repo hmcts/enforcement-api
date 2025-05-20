@@ -19,7 +19,7 @@ import lombok.ToString;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationType;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -44,13 +44,13 @@ public class CaseNotification {
     private UUID providerNotificationId;
 
     @Column(name = "submitted_at")
-    private LocalDateTime submittedAt;
+    private Instant submittedAt;
 
     @Column(name = "scheduled_at")
-    private LocalDateTime scheduledAt;
+    private Instant scheduledAt;
 
     @Column(name = "last_updated_at", nullable = false)
-    private LocalDateTime lastUpdatedAt;
+    private Instant lastUpdatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -65,11 +65,11 @@ public class CaseNotification {
 
     @PrePersist
     public void prePersist() {
-        this.lastUpdatedAt = LocalDateTime.now();
+        this.lastUpdatedAt = Instant.now();
     }
 
     @PreUpdate
     public void preUpdate() {
-        this.lastUpdatedAt = LocalDateTime.now();
+        this.lastUpdatedAt = Instant.now();
     }
 }

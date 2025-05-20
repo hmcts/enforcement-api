@@ -16,7 +16,7 @@ import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.SendEmailResponse;
 import uk.gov.service.notify.Notification;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -163,7 +163,7 @@ public class NotificationService {
     
     private void updateNotificationWithStatus(CaseNotification caseNotification, String status) {
         try {
-            NotificationStatus notificationStatus = NotificationStatus.fromString(status);
+            NotificationStatus notificationStatus = NotificationStatus.fromApiValue(status);
             updateNotificationStatus(caseNotification, notificationStatus, null);
         } catch (IllegalArgumentException e) {
             log.warn("Unknown notification status: {}", status);
@@ -177,14 +177,14 @@ public class NotificationService {
         
         try {
             notification.setStatus(status);
-            notification.setLastUpdatedAt(LocalDateTime.now());
+            notification.setLastUpdatedAt(Instant.now());
             
             if (providerNotificationId != null) {
                 notification.setProviderNotificationId(providerNotificationId);
             }
             
             if (status == NotificationStatus.SENDING) {
-                notification.setSubmittedAt(LocalDateTime.now());
+                notification.setSubmittedAt(Instant.now());
             }
             
             CaseNotification saved = notificationRepository.save(notification);

@@ -4,21 +4,19 @@ import org.junit.jupiter.api.Test;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationType;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CaseNotificationTest {
 
     @Test
     void testEntityCreation() {
-
         UUID notificationId = UUID.randomUUID();
         UUID caseId = UUID.randomUUID();
         UUID providerNotificationId = UUID.randomUUID();
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
         
         CaseNotification notification = new CaseNotification();
         notification.setNotificationId(notificationId);
@@ -31,36 +29,34 @@ class CaseNotificationTest {
         notification.setType(NotificationType.EMAIL);
         notification.setRecipient("test@example.com");
         
-        assertEquals(notificationId, notification.getNotificationId());
-        assertEquals(caseId, notification.getCaseId());
-        assertEquals(providerNotificationId, notification.getProviderNotificationId());
-        assertEquals(now, notification.getSubmittedAt());
-        assertEquals(now, notification.getScheduledAt());
-        assertEquals(now, notification.getLastUpdatedAt());
-        assertEquals(NotificationStatus.DELIVERED, notification.getStatus());
-        assertEquals(NotificationType.EMAIL, notification.getType());
-        assertEquals("test@example.com", notification.getRecipient());
+        assertThat(notification.getNotificationId()).isEqualTo(notificationId);
+        assertThat(notification.getCaseId()).isEqualTo(caseId);
+        assertThat(notification.getProviderNotificationId()).isEqualTo(providerNotificationId);
+        assertThat(notification.getSubmittedAt()).isEqualTo(now);
+        assertThat(notification.getScheduledAt()).isEqualTo(now);
+        assertThat(notification.getLastUpdatedAt()).isEqualTo(now);
+        assertThat(notification.getStatus()).isEqualTo(NotificationStatus.DELIVERED);
+        assertThat(notification.getType()).isEqualTo(NotificationType.EMAIL);
+        assertThat(notification.getRecipient()).isEqualTo("test@example.com");
     }
     
     @Test
     void testPrePersist() {
-
         CaseNotification notification = new CaseNotification();
         
         notification.prePersist();
         
-        assertNotNull(notification.getLastUpdatedAt());
+        assertThat(notification.getLastUpdatedAt()).isNotNull();
     }
     
     @Test
     void testPreUpdate() {
-
         CaseNotification notification = new CaseNotification();
-        LocalDateTime oldDate = LocalDateTime.now().minusDays(1);
+        Instant oldDate = Instant.now().minusSeconds(86400); // One day ago
         notification.setLastUpdatedAt(oldDate);
         
         notification.preUpdate();
         
-        assertNotNull(notification.getLastUpdatedAt());
+        assertThat(notification.getLastUpdatedAt()).isNotNull();
     }
 }
