@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.enforcement;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -14,8 +16,6 @@ import uk.gov.hmcts.reform.enforcement.ccd.CaseType;
 import uk.gov.hmcts.reform.enforcement.ccd.domain.EnforcementCase;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.rse.ccd.lib.test.CftlibTest;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)

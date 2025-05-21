@@ -322,6 +322,8 @@ dependencies {
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
 
+  testImplementation(platform('org.junit:junit-bom:5.12.2'))
+  
   developmentOnly 'com.h2database:h2'
 
   // Allow fast reloading during dev; recompile a class to trigger fast reload + definition reimport.
