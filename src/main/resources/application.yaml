@@ -37,9 +37,9 @@ spring:
     name: Enforcement API
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${ENFORCEMENT_DB_HOST:localhost}:${DB_PORT:5432}/${ENFORCEMENT_DB_NAME:enforcement}${ENFORCEMENT_DB_OPTIONS:}
-    username: ${ENFORCEMENT_DB_USER_NAME}
-    password: ${ENFORCEMENT_DB_PASSWORD}
+    url: jdbc:postgresql://${ENFORCEMENT_DB_HOST:localhost}:${DB_PORT:6432}/${ENFORCEMENT_DB_NAME:enforcement}${ENFORCEMENT_DB_OPTIONS:}
+    username: ${ENFORCEMENT_DB_USER_NAME:postgres}
+    password: ${ENFORCEMENT_DB_PASSWORD:postgres}
     properties:
       charSet: UTF-8
     hikari:

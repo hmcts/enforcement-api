@@ -367,11 +367,12 @@ project.tasks.named("processSmokeTestResources") {
 tasks.withType(CftlibExec).configureEach {
   group = 'ccd tasks'
   authMode = AuthMode.Local
+  environment 'SPRING_PROFILES_ACTIVE', 'dev'
   environment 'RSE_LIB_ADDITIONAL_DATABASES', 'enforcement'
   environment 'ENFORCEMENT_DB_USER_NAME', 'postgres'
   environment 'ENFORCEMENT_DB_PASSWORD', 'postgres'
   environment 'DB_PORT', '6432'
-  environment 'SPRING_PROFILES_ACTIVE', 'dev'
+
 }
 
 tasks.register('highLevelDataSetup', JavaExec) {
