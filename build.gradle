@@ -323,7 +323,10 @@ dependencies {
   contractTestImplementation sourceSets.test.runtimeClasspath
 
   testImplementation(platform('org.junit:junit-bom:5.12.2'))
-  
+  testImplementation group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
+  testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: testcontainersVersion
+  testImplementation group: 'org.testcontainers', name: 'postgresql', version: testcontainersVersion
+
   developmentOnly 'com.h2database:h2'
 
   // Allow fast reloading during dev; recompile a class to trigger fast reload + definition reimport.
@@ -388,6 +391,10 @@ check.dependsOn cftlibTest
 
 rootProject.tasks.named("processContractTestResources") {
   duplicatesStrategy = 'include'
+}
+
+rootProject.tasks.named('processIntegrationTestResources', Copy) {
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
 wrapper {
