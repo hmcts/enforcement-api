@@ -37,7 +37,7 @@ spring:
     name: Enforcement API
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${ENFORCEMENT_DB_HOST:localhost}:${DB_PORT:6432}/${ENFORCEMENT_DB_NAME:enforcement}${ENFORCEMENT_DB_OPTIONS:}
+    url: jdbc:postgresql://${ENFORCEMENT_DB_HOST:localhost}:${DB_PORT:5432}/${ENFORCEMENT_DB_NAME:enforcement}${ENFORCEMENT_DB_OPTIONS:}
     username: ${ENFORCEMENT_DB_USER_NAME:postgres}
     password: ${ENFORCEMENT_DB_PASSWORD:postgres}
     properties:
@@ -56,13 +56,13 @@ spring:
           lob:
             # silence the 'wall-of-text' - unnecessary exception throw about blob types
             non_contextual_creation: true
-            
   flyway:
-    enabled: true
-    locations: classpath:db/migration
-    noop:
-      strategy: ${FLYWAY_NOOP_STRATEGY:false}
+    enabled: false
 
+
+flyway:
+  noop:
+    strategy: ${FLYWAY_NOOP_STRATEGY:false}
 idam:
   api:
     url: ${IDAM_API_URL:http://localhost:5062}
