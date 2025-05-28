@@ -14,5 +14,12 @@
     </notes>
     <cve>CVE-2024-6763</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+    mxparser is not xtream.
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/io\.github\.x\-stream/mxparser@.*$</packageUrl>
+   <cpe>cpe:/a:xstream_project:xstream</cpe>
+  </suppress>
   <!--End of false positives section -->
 </suppressions>
