@@ -19,7 +19,8 @@
     mxparser is not xtream.
     ]]></notes>
     <packageUrl regex="true">^pkg:maven/io\.github\.x\-stream/mxparser@.*$</packageUrl>
-   <cpe>cpe:2.3:a:x-stream:xstream:1.4.19:*:*:*:*:*:*:*</cpe>
+   <cpe>cpe:2.3:a:x-stream:xstream:1.2.2:*:*:*:*:*:*:*</cpe>
+   <cpe>cpe:2.3:a:xstream:xstream:1.2.2:*:*:*:*:*:*:*</cpe>
   </suppress>
   <!--End of false positives section -->
 </suppressions>
