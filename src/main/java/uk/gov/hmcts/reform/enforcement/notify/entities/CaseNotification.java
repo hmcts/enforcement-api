@@ -4,8 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -33,7 +31,6 @@ import java.util.UUID;
 public class CaseNotification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "notification_id", nullable = false)
     private UUID notificationId;
 
@@ -53,23 +50,28 @@ public class CaseNotification {
     private Instant lastUpdatedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, length = 50)
     private NotificationStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @Column(name = "type", nullable = false, length = 50)
     private NotificationType type;
 
-    @Column(name = "recipient", nullable = false)
+    @Column(name = "recipient", nullable = false, length = 255)
     private String recipient;
 
     @PrePersist
     public void prePersist() {
-        this.lastUpdatedAt = Instant.now();
+        if (notificationId == null) {
+            notificationId = UUID.randomUUID();
+        }
+        if (lastUpdatedAt == null) {
+            lastUpdatedAt = Instant.now();
+        }
     }
 
     @PreUpdate
     public void preUpdate() {
-        this.lastUpdatedAt = Instant.now();
+        lastUpdatedAt = Instant.now();
     }
 }
