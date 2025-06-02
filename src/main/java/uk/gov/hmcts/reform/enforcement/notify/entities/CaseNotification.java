@@ -1,0 +1,77 @@
+package uk.gov.hmcts.reform.enforcement.notify.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
+import uk.gov.hmcts.reform.enforcement.notify.model.NotificationType;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "case_notification")
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(of = "notificationId")
+public class CaseNotification {
+
+    @Id
+    @Column(name = "notification_id", nullable = false)
+    private UUID notificationId;
+
+    @Column(name = "case_id", nullable = false)
+    private UUID caseId;
+
+    @Column(name = "provider_notification_id", nullable = true)
+    private UUID providerNotificationId;
+
+    @Column(name = "submitted_at")
+    private Instant submittedAt;
+
+    @Column(name = "scheduled_at")
+    private Instant scheduledAt;
+
+    @Column(name = "last_updated_at", nullable = false)
+    private Instant lastUpdatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 50)
+    private NotificationStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 50)
+    private NotificationType type;
+
+    @Column(name = "recipient", nullable = false, length = 255)
+    private String recipient;
+
+    @PrePersist
+    public void prePersist() {
+        if (notificationId == null) {
+            notificationId = UUID.randomUUID();
+        }
+        if (lastUpdatedAt == null) {
+            lastUpdatedAt = Instant.now();
+        }
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        lastUpdatedAt = Instant.now();
+    }
+}
