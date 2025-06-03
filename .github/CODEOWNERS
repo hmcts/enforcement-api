@@ -1,4 +1,4 @@
-* @hmcts/platform-operations @hmcts/developer-enablement
+* @hmcts/enforcement-service-admins
 
 # Ignore files updated by Renovate
 gradle/wrapper/gradle-wrapper.properties
