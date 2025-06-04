@@ -86,3 +86,4 @@ azure:
 
 testing-support:
   enabled: ${ENABLE_TESTING_SUPPORT:false}
+
