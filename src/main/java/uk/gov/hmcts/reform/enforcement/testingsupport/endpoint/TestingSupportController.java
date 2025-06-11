@@ -88,7 +88,7 @@ public class TestingSupportController {
         } catch (Exception e) {
             log.error("Failed to schedule Hello World task", e);
             return ResponseEntity.internalServerError()
-                .body("Failed to schedule Hello World task: " + e.getMessage());
+                .body("An error occurred while scheduling the Hello World task.");
         }
     }
 }
