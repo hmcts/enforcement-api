@@ -279,6 +279,8 @@ dependencies {
   
   implementation group: 'com.github.kagkarlsson', name: 'db-scheduler-spring-boot-starter', version: "${dbSchedulerVersion}"
   
+  implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.11.0'
+  
   runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: flywayVersion
   
   implementation group: 'org.flywaydb', name: 'flyway-core', version: flywayVersion
