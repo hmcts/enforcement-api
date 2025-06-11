@@ -159,8 +159,7 @@ class TestingSupportControllerTest {
         );
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody()).contains("Failed to schedule Hello World task");
-        assertThat(response.getBody()).contains(errorMessage);
+        assertThat(response.getBody()).contains("An error occurred while scheduling the Hello World task.");
         
         verify(schedulerClient, times(1)).scheduleIfNotExists(any(TaskInstance.class), any(Instant.class));
         verifyNoMoreInteractions(schedulerClient);
