@@ -184,7 +184,6 @@ tasks.register('runAndPublishConsumerPactTests', Test) {
 
 project.ext {
   pactVersion = getCheckedOutGitCommitHash()
-  dbSchedulerVersion = "15.3.0"
 }
 
 pact {

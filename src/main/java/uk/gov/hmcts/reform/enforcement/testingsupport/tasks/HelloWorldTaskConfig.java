@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class HelloWorldTaskConfig {
     private static final Logger log = LoggerFactory.getLogger(HelloWorldTaskConfig.class);
 
-    public static final String TASK_NAME = "hello-world-task";
+    private static final String TASK_NAME = "hello-world-task";
 
     // Counter to track execution attempts for demonstration purposes
     private final AtomicInteger attemptCounter = new AtomicInteger(0);
