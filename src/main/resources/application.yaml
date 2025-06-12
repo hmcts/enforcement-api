@@ -62,7 +62,6 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-
 flyway:
   noop:
     strategy: ${FLYWAY_NOOP_STRATEGY:false}
@@ -86,3 +85,10 @@ azure:
 
 testing-support:
   enabled: ${ENABLE_TESTING_SUPPORT:false}
+
+# DB Scheduler Configuration
+db-scheduler:
+  enabled: false # This disables the autoconfiguration of DB Scheduler. Always off.
+  executor-enabled: ${DB_SCHEDULER_EXECUTOR_ENABLED:true}
+  polling-interval-seconds: 10
+  threads: 10
