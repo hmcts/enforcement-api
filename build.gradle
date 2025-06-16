@@ -313,7 +313,7 @@ dependencies {
   implementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: serenityBddVersion
   implementation group: 'net.serenity-bdd', name: 'serenity-core', version: serenityBddVersion
   testImplementation group: 'net.serenity-bdd', name: 'serenity-junit5', version: serenityBddVersion
-  testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: '1.13.0'
+  testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: '1.13.1'
 
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springFrameworkBootVersion) {
@@ -324,11 +324,11 @@ dependencies {
   testImplementation 'com.h2database:h2'
 
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: '4.6.17'
-  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.13.0')
+  contractTestImplementation('org.junit.jupiter:junit-jupiter-api:5.13.1')
   contractTestImplementation sourceSets.main.runtimeClasspath
   contractTestImplementation sourceSets.test.runtimeClasspath
 
-  testImplementation(platform('org.junit:junit-bom:5.13.0'))
+  testImplementation(platform('org.junit:junit-bom:5.13.1'))
   testImplementation group: 'org.testcontainers', name: 'testcontainers', version: testcontainersVersion
   testImplementation group: 'org.testcontainers', name: 'junit-jupiter', version: testcontainersVersion
   testImplementation group: 'org.testcontainers', name: 'postgresql', version: testcontainersVersion
