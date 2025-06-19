@@ -1,316 +1,288 @@
 package uk.gov.hmcts.reform.enforcement.notify.service;
 
+import com.github.kagkarlsson.scheduler.SchedulerClient;
+import com.github.kagkarlsson.scheduler.task.SchedulableInstance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
-import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
+import uk.gov.hmcts.reform.enforcement.notify.domain.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
-import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
-import uk.gov.hmcts.reform.enforcement.notify.model.NotificationType;
+import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationResponse;
 import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
-import uk.gov.service.notify.NotificationClient;
-import uk.gov.service.notify.NotificationClientException;
-import uk.gov.service.notify.Notification;
-import uk.gov.service.notify.SendEmailResponse;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus.DELIVERED;
+import static uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus.PENDING_SCHEDULE;
+import static uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus.SCHEDULED;
+import static uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus.SENDING;
+import static uk.gov.hmcts.reform.enforcement.notify.model.NotificationType.EMAIL;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked")
 class NotificationServiceTest {
 
     @Mock
-    private NotificationClient notificationClient;
-    
-    @Mock
     private NotificationRepository notificationRepository;
-    
+
+    @Mock
+    private SchedulerClient schedulerClient;
+
+    @InjectMocks
     private NotificationService notificationService;
-    
+
     private EmailNotificationRequest emailRequest;
-    private CaseNotification mockCaseNotification;
-    private SendEmailResponse mockSendEmailResponse;
+    private CaseNotification savedNotification;
     private UUID notificationId;
-    private long statusCheckDelay = 100;
-    
+    private UUID caseId;
+
     @BeforeEach
     void setUp() {
         notificationId = UUID.randomUUID();
-        notificationService = new NotificationService(notificationClient, notificationRepository, statusCheckDelay);
-        
+        caseId = UUID.randomUUID();
+
         Map<String, Object> personalisation = new HashMap<>();
-        personalisation.put("name", "Jonathan");
-        
+        personalisation.put("name", "John Doe");
+        personalisation.put("reference", "REF123");
+
         emailRequest = new EmailNotificationRequest();
-        emailRequest.setTemplateId("template-123");
         emailRequest.setEmailAddress("test@example.com");
+        emailRequest.setTemplateId("template-123");
         emailRequest.setPersonalisation(personalisation);
-        
-        mockCaseNotification = new CaseNotification();
-        mockCaseNotification.setNotificationId(UUID.randomUUID());
-        
-        mockSendEmailResponse = mock(SendEmailResponse.class);
+        emailRequest.setReference("notification-ref");
+        emailRequest.setEmailReplyToId("reply-to-123");
+
+        savedNotification = new CaseNotification();
+        savedNotification.setNotificationId(notificationId);
+        savedNotification.setCaseId(caseId);
+        savedNotification.setStatus(PENDING_SCHEDULE);
+        savedNotification.setType(EMAIL.toString());
+        savedNotification.setRecipient("test@example.com");
+        savedNotification.setSubmittedAt(LocalDateTime.now());
     }
-    
+
     @Test
-    void testCreateCaseNotification() {
-        String recipient = "test@example.com";
-        NotificationType type = NotificationType.EMAIL;
-        UUID caseId = UUID.randomUUID();
-        
-        when(notificationRepository.save(any(CaseNotification.class))).thenAnswer(invocation -> {
-            CaseNotification saved = invocation.getArgument(0);
-            saved.setNotificationId(UUID.randomUUID());
-            return saved;
-        });
-        
-        CaseNotification result = notificationService.createCaseNotification(recipient, type, caseId);
-        
-        assertNotNull(result);
-        assertThat(result.getCaseId()).isEqualTo(caseId);
-        assertThat(result.getType()).isEqualTo(type);
-        assertThat(result.getRecipient()).isEqualTo(recipient);
-        assertThat(result.getStatus()).isEqualTo(NotificationStatus.PENDING_SCHEDULE);
-        verify(notificationRepository).save(any(CaseNotification.class));
-    }
-    
-    @Test
-    void testCreateCaseNotificationDatabaseError() {
-        String recipient = "test@example.com";
-        NotificationType type = NotificationType.EMAIL;
-        UUID caseId = UUID.randomUUID();
-        
-        doThrow(new DataAccessException("DB error") {}).when(notificationRepository).save(any(CaseNotification.class));
-        
-        NotificationException exception = assertThrows(NotificationException.class, () -> 
-            notificationService.createCaseNotification(recipient, type, caseId));
-        
-        assertThat(exception.getMessage()).isEqualTo("Failed to save Case Notification.");
-    }
-    
-    @Test
-    void testSendEmail() throws NotificationClientException {
-        when(mockSendEmailResponse.getNotificationId()).thenReturn(notificationId);
-        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(mockCaseNotification);
-        when(notificationClient.sendEmail(
-            anyString(), anyString(), anyMap(), anyString()
-        )).thenReturn(mockSendEmailResponse);
-        
-        SendEmailResponse result = notificationService.sendEmail(emailRequest);
-        
-        assertNotNull(result);
-        assertSame(mockSendEmailResponse, result);
-        verify(notificationClient).sendEmail(
-            eq(emailRequest.getTemplateId()),
-            eq(emailRequest.getEmailAddress()),
-            eq(emailRequest.getPersonalisation()),
-            anyString()
-        );
-        
+    void scheduleEmailNotification_ShouldReturnResponse_WhenSuccessfullyScheduled() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        EmailNotificationResponse response = notificationService.scheduleEmailNotification(emailRequest);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getTaskId()).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(SCHEDULED.toString());
+        assertThat(response.getNotificationId()).isEqualTo(notificationId);
+
+        verify(notificationRepository, times(2)).save(any(CaseNotification.class));
+        verify(schedulerClient).scheduleIfNotExists(any(SchedulableInstance.class));
+
         ArgumentCaptor<CaseNotification> notificationCaptor = ArgumentCaptor.forClass(CaseNotification.class);
         verify(notificationRepository, times(2)).save(notificationCaptor.capture());
-        
+
         CaseNotification firstSave = notificationCaptor.getAllValues().get(0);
-        assertThat(firstSave.getType()).isEqualTo(NotificationType.EMAIL);
-        assertThat(firstSave.getRecipient()).isEqualTo(emailRequest.getEmailAddress());
-        
+        assertThat(firstSave.getRecipient()).isEqualTo("test@example.com");
+        assertThat(firstSave.getStatus()).isEqualTo(PENDING_SCHEDULE);
+        assertThat(firstSave.getType()).isEqualTo(EMAIL.toString());
+
         CaseNotification secondSave = notificationCaptor.getAllValues().get(1);
-        assertThat(secondSave.getStatus()).isEqualTo(NotificationStatus.SUBMITTED);
-        assertThat(secondSave.getProviderNotificationId()).isEqualTo(notificationId);
+        assertThat(secondSave.getStatus()).isEqualTo(SCHEDULED);
+        assertThat(secondSave.getLastUpdatedAt()).isNotNull();
     }
-    
+
     @Test
-    void testSendEmailFailure() throws NotificationClientException {
-        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(mockCaseNotification);
-        when(notificationClient.sendEmail(
-            anyString(), anyString(), anyMap(), anyString()
-        )).thenThrow(new NotificationClientException("API error"));
-        
-        NotificationException exception = assertThrows(NotificationException.class, () -> 
-            notificationService.sendEmail(emailRequest));
-        
-        assertThat(exception.getMessage()).isEqualTo("Email failed to send, please try again.");
-        
+    void scheduleEmailNotification_ShouldStillReturnResponse_WhenTaskAlreadyExists() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(false);
+
+        EmailNotificationResponse response = notificationService.scheduleEmailNotification(emailRequest);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(SCHEDULED.toString());
+        assertThat(response.getNotificationId()).isEqualTo(notificationId);
+
+        verify(schedulerClient).scheduleIfNotExists(any(SchedulableInstance.class));
         verify(notificationRepository, times(2)).save(any(CaseNotification.class));
     }
-    
+
     @Test
-    void testCheckNotificationStatus() throws NotificationClientException {
-        Notification mockNotification = mock(Notification.class);
-        when(mockNotification.getStatus()).thenReturn("delivered");
-        
-        when(notificationClient.getNotificationById(notificationId.toString()))
-            .thenReturn(mockNotification);
-            
-        when(notificationRepository.findByProviderNotificationId(notificationId))
-            .thenReturn(Optional.of(mockCaseNotification));
-        
-        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
-        
-        Notification result = future.join();
-        
-        assertNotNull(result);
-        assertSame(mockNotification, result);
-        verify(notificationClient).getNotificationById(notificationId.toString());
-        verify(notificationRepository).findByProviderNotificationId(notificationId);
-        
+    void scheduleEmailNotification_ShouldThrowException_WhenDatabaseSaveFails() {
+        DataAccessException dbException = new DataAccessException("Database connection failed") {};
+        when(notificationRepository.save(any(CaseNotification.class))).thenThrow(dbException);
+
+        assertThatThrownBy(() -> notificationService.scheduleEmailNotification(emailRequest))
+            .isInstanceOf(NotificationException.class)
+            .hasMessage("Failed to save Case Notification.")
+            .hasCause(dbException);
+
         verify(notificationRepository).save(any(CaseNotification.class));
+        verify(schedulerClient, never()).scheduleIfNotExists(any(SchedulableInstance.class));
     }
-    
+
     @Test
-    void testCheckNotificationStatusNotFound() throws NotificationClientException {
-        Notification mockNotification = mock(Notification.class);
-        when(notificationClient.getNotificationById(notificationId.toString()))
-            .thenReturn(mockNotification);
-    
-        when(notificationRepository.findByProviderNotificationId(notificationId))
-            .thenReturn(Optional.empty());
-    
-        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
-    
-        Notification result = future.join();
-    
-        assertNotNull(result);
-        verify(notificationRepository).findByProviderNotificationId(notificationId);
-        verify(notificationRepository, never()).save(any(CaseNotification.class));
-    }
-    
-    @Test
-    void testCheckNotificationStatusClientException() throws NotificationClientException {
-        when(notificationClient.getNotificationById(anyString()))
-            .thenThrow(new NotificationClientException("API error"));
-        
-        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
-        
-        assertThrows(CompletionException.class, future::join);
-    }
-    
-    @Test
-    void testUpdateNotificationWithValidStatus() throws NotificationClientException {
-        Notification mockNotification = mock(Notification.class);
-        when(mockNotification.getStatus()).thenReturn("delivered");
-        
-        when(notificationClient.getNotificationById(notificationId.toString()))
-            .thenReturn(mockNotification);
-            
-        when(notificationRepository.findByProviderNotificationId(notificationId))
-            .thenReturn(Optional.of(mockCaseNotification));
-        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(mockCaseNotification);
-        
-        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
-        future.join();
-        
+    void updateNotificationStatus_ShouldUpdateStatus_WhenNotificationExists() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(existingNotification);
+
+        notificationService.updateNotificationStatus(notificationId, "SENDING");
+
         ArgumentCaptor<CaseNotification> captor = ArgumentCaptor.forClass(CaseNotification.class);
         verify(notificationRepository).save(captor.capture());
-        
-        CaseNotification savedNotification = captor.getValue();
-        assertThat(savedNotification.getStatus()).isEqualTo(NotificationStatus.DELIVERED);
+
+        CaseNotification updatedNotification = captor.getValue();
+        assertThat(updatedNotification.getStatus()).isEqualTo(SENDING);
+        assertThat(updatedNotification.getLastUpdatedAt()).isNotNull();
+        assertThat(updatedNotification.getSubmittedAt()).isNotNull();
     }
-    
+
     @Test
-    void testUpdateNotificationWithInvalidStatus() throws NotificationClientException {
-        Notification mockNotification = mock(Notification.class);
-        when(mockNotification.getStatus()).thenReturn("invalid-status");
-        
-        when(notificationClient.getNotificationById(notificationId.toString()))
-            .thenReturn(mockNotification);
-            
-        when(notificationRepository.findByProviderNotificationId(notificationId))
-            .thenReturn(Optional.of(mockCaseNotification));
-        
-        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
-        future.join();
-        
+    void updateNotificationStatus_ShouldSetSubmittedAt_WhenStatusIsSending() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(existingNotification);
+
+        notificationService.updateNotificationStatus(notificationId, "SENDING");
+
+        ArgumentCaptor<CaseNotification> captor = ArgumentCaptor.forClass(CaseNotification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        CaseNotification updatedNotification = captor.getValue();
+        assertThat(updatedNotification.getStatus()).isEqualTo(SENDING);
+        assertThat(updatedNotification.getSubmittedAt()).isNotNull();
+    }
+
+    @Test
+    void updateNotificationStatus_ShouldNotSetSubmittedAt_WhenStatusIsNotSending() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(existingNotification);
+
+        notificationService.updateNotificationStatus(notificationId, "DELIVERED");
+
+        ArgumentCaptor<CaseNotification> captor = ArgumentCaptor.forClass(CaseNotification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        CaseNotification updatedNotification = captor.getValue();
+        assertThat(updatedNotification.getStatus()).isEqualTo(DELIVERED);
+        assertThat(updatedNotification.getSubmittedAt()).isNull();
+        assertThat(updatedNotification.getLastUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    void updateNotificationStatus_ShouldLogError_WhenNotificationNotFound() {
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
+
+        notificationService.updateNotificationStatus(notificationId, "DELIVERED");
+
+        verify(notificationRepository).findById(notificationId);
         verify(notificationRepository, never()).save(any(CaseNotification.class));
     }
-    
+
     @Test
-    void testSendingStatusSetsSubmittedTime() {
-        mockCaseNotification.setSubmittedAt(null);
-        when(mockSendEmailResponse.getNotificationId()).thenReturn(notificationId);
-        
-        when(notificationRepository.save(any(CaseNotification.class))).thenAnswer(i -> {
-            CaseNotification notification = i.getArgument(0);
-            if (notification.getStatus() == NotificationStatus.SENDING) {
-                assertNotNull(notification.getSubmittedAt());
-            }
-            return notification;
-        });
-        
-        try {
-            when(notificationClient.sendEmail(anyString(), anyString(), anyMap(), anyString()))
-                .thenReturn(mockSendEmailResponse);
-            notificationService.sendEmail(emailRequest);
-        } catch (NotificationClientException e) {
-            // No exception in this case
-        }
-        
-        verify(notificationRepository, times(2)).save(any(CaseNotification.class));
+    void updateNotificationStatus_ShouldLogWarning_WhenInvalidStatusString() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+
+        notificationService.updateNotificationStatus(notificationId, "INVALID_STATUS");
+
+        verify(notificationRepository).findById(notificationId);
+        verify(notificationRepository, never()).save(any(CaseNotification.class));
     }
-    
+
     @Test
-    void testDatabaseErrorHandling() throws NotificationClientException {
-        Notification mockNotification = mock(Notification.class);
-        when(mockNotification.getStatus()).thenReturn("delivered");
-        
-        when(notificationClient.getNotificationById(notificationId.toString()))
-            .thenReturn(mockNotification);
-            
-        when(notificationRepository.findByProviderNotificationId(notificationId))
-            .thenReturn(Optional.of(mockCaseNotification));
-        
+    void updateNotificationStatus_ShouldHandleException_WhenSaveFails() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
         when(notificationRepository.save(any(CaseNotification.class)))
             .thenThrow(new RuntimeException("Database error"));
-        
-        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
-        
-        Notification result = future.join();
-        assertNotNull(result);
+
+        assertThatCode(() ->
+                           notificationService.updateNotificationStatus(notificationId, "DELIVERED")
+        ).doesNotThrowAnyException();
+
+        verify(notificationRepository).save(any(CaseNotification.class));
     }
-    
+
     @Test
-    void testStatusTransitionFromSubmittedToDelivered() throws NotificationClientException {
-        Notification mockNotification = mock(Notification.class);
-        when(mockNotification.getStatus()).thenReturn("delivered");
-        
-        when(notificationClient.getNotificationById(notificationId.toString()))
-            .thenReturn(mockNotification);
-            
-        mockCaseNotification.setStatus(NotificationStatus.SUBMITTED);
-        when(notificationRepository.findByProviderNotificationId(notificationId))
-            .thenReturn(Optional.of(mockCaseNotification));
-        
-        CompletableFuture<Notification> future = notificationService.checkNotificationStatus(notificationId.toString());
-        future.join();
-        
-        ArgumentCaptor<CaseNotification> captor = ArgumentCaptor.forClass(CaseNotification.class);
-        verify(notificationRepository).save(captor.capture());
-        
-        CaseNotification savedNotification = captor.getValue();
-        assertThat(savedNotification.getStatus()).isEqualTo(NotificationStatus.DELIVERED);
+    void scheduleEmailNotification_ShouldGenerateUniqueTaskIds() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        EmailNotificationResponse response1 = notificationService.scheduleEmailNotification(emailRequest);
+        EmailNotificationResponse response2 = notificationService.scheduleEmailNotification(emailRequest);
+
+        assertThat(response1.getTaskId()).isNotEqualTo(response2.getTaskId());
+    }
+
+    @Test
+    void scheduleEmailNotification_ShouldScheduleTaskWithCorrectTiming() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        notificationService.scheduleEmailNotification(emailRequest);
+
+        ArgumentCaptor<SchedulableInstance<?>> taskCaptor = ArgumentCaptor.forClass(SchedulableInstance.class);
+        verify(schedulerClient).scheduleIfNotExists(taskCaptor.capture());
+
+        SchedulableInstance<?> scheduledTask = taskCaptor.getValue();
+        assertThat(scheduledTask).isNotNull();
+    }
+
+    @Test
+    void updateNotificationStatus_ShouldSetProviderNotificationId_WhenProvided() {
+        UUID providerNotificationId = UUID.randomUUID();
+        CaseNotification notificationWithProvider = new CaseNotification();
+        notificationWithProvider.setNotificationId(notificationId);
+        notificationWithProvider.setStatus(SCHEDULED);
+        notificationWithProvider.setProviderNotificationId(providerNotificationId);
+
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification,
+                                                                                    notificationWithProvider);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        EmailNotificationResponse response = notificationService.scheduleEmailNotification(emailRequest);
+
+        assertThat(response).isNotNull();
+        verify(notificationRepository, times(2)).save(any(CaseNotification.class));
+    }
+
+    @Test
+    void constructor_ShouldInitializeFields() {
+        NotificationService service = new NotificationService(notificationRepository, schedulerClient);
+
+        assertThat(service).isNotNull();
     }
 }

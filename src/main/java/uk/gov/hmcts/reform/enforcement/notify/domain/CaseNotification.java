@@ -1,9 +1,11 @@
-package uk.gov.hmcts.reform.enforcement.notify.entities;
+package uk.gov.hmcts.reform.enforcement.notify.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -15,9 +17,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
-import uk.gov.hmcts.reform.enforcement.notify.model.NotificationType;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -31,6 +32,7 @@ import java.util.UUID;
 public class CaseNotification {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "notification_id", nullable = false)
     private UUID notificationId;
 
@@ -41,37 +43,31 @@ public class CaseNotification {
     private UUID providerNotificationId;
 
     @Column(name = "submitted_at")
-    private Instant submittedAt;
+    private LocalDateTime submittedAt;
 
     @Column(name = "scheduled_at")
-    private Instant scheduledAt;
+    private LocalDateTime scheduledAt;
 
     @Column(name = "last_updated_at", nullable = false)
-    private Instant lastUpdatedAt;
+    private LocalDateTime lastUpdatedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 50)
+    @Column(name = "status", nullable = false)
     private NotificationStatus status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false, length = 50)
-    private NotificationType type;
+    @Column(name = "type", nullable = false)
+    private String type;
 
-    @Column(name = "recipient", nullable = false, length = 255)
+    @Column(name = "recipient", nullable = false)
     private String recipient;
 
     @PrePersist
     public void prePersist() {
-        if (notificationId == null) {
-            notificationId = UUID.randomUUID();
-        }
-        if (lastUpdatedAt == null) {
-            lastUpdatedAt = Instant.now();
-        }
+        this.lastUpdatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     public void preUpdate() {
-        lastUpdatedAt = Instant.now();
+        this.lastUpdatedAt = LocalDateTime.now();
     }
 }
