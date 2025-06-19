@@ -10,13 +10,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessException;
-import uk.gov.hmcts.reform.enforcement.notify.domain.CaseNotification;
+import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationResponse;
 import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -52,12 +52,11 @@ class NotificationServiceTest {
     private EmailNotificationRequest emailRequest;
     private CaseNotification savedNotification;
     private UUID notificationId;
-    private UUID caseId;
 
     @BeforeEach
     void setUp() {
         notificationId = UUID.randomUUID();
-        caseId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
 
         Map<String, Object> personalisation = new HashMap<>();
         personalisation.put("name", "John Doe");
@@ -76,7 +75,7 @@ class NotificationServiceTest {
         savedNotification.setStatus(PENDING_SCHEDULE);
         savedNotification.setType(EMAIL.toString());
         savedNotification.setRecipient("test@example.com");
-        savedNotification.setSubmittedAt(LocalDateTime.now());
+        savedNotification.setSubmittedAt(Instant.now());
     }
 
     @Test
@@ -97,7 +96,7 @@ class NotificationServiceTest {
         ArgumentCaptor<CaseNotification> notificationCaptor = ArgumentCaptor.forClass(CaseNotification.class);
         verify(notificationRepository, times(2)).save(notificationCaptor.capture());
 
-        CaseNotification firstSave = notificationCaptor.getAllValues().get(0);
+        CaseNotification firstSave = notificationCaptor.getAllValues().getFirst();
         assertThat(firstSave.getRecipient()).isEqualTo("test@example.com");
         assertThat(firstSave.getStatus()).isEqualTo(PENDING_SCHEDULE);
         assertThat(firstSave.getType()).isEqualTo(EMAIL.toString());
@@ -134,6 +133,131 @@ class NotificationServiceTest {
 
         verify(notificationRepository).save(any(CaseNotification.class));
         verify(schedulerClient, never()).scheduleIfNotExists(any(SchedulableInstance.class));
+    }
+
+    @Test
+    void scheduleEmailNotification_ShouldGenerateUniqueTaskIds() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        EmailNotificationResponse response1 = notificationService.scheduleEmailNotification(emailRequest);
+        EmailNotificationResponse response2 = notificationService.scheduleEmailNotification(emailRequest);
+
+        assertThat(response1.getTaskId()).isNotEqualTo(response2.getTaskId());
+    }
+
+    @Test
+    void scheduleEmailNotification_ShouldScheduleTaskWithCorrectTiming() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        notificationService.scheduleEmailNotification(emailRequest);
+
+        ArgumentCaptor<SchedulableInstance<?>> taskCaptor = ArgumentCaptor.forClass(SchedulableInstance.class);
+        verify(schedulerClient).scheduleIfNotExists(taskCaptor.capture());
+
+        SchedulableInstance<?> scheduledTask = taskCaptor.getValue();
+        assertThat(scheduledTask).isNotNull();
+    }
+
+    @Test
+    void scheduleEmailNotification_ShouldScheduleImmediately() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        Instant beforeScheduling = Instant.now();
+        notificationService.scheduleEmailNotification(emailRequest);
+        Instant afterScheduling = Instant.now();
+
+        ArgumentCaptor<SchedulableInstance<?>> taskCaptor = ArgumentCaptor.forClass(SchedulableInstance.class);
+        verify(schedulerClient).scheduleIfNotExists(taskCaptor.capture());
+
+        SchedulableInstance<?> scheduledTask = taskCaptor.getValue();
+        Instant currentTime = Instant.now();
+        Instant scheduledTime = scheduledTask.getNextExecutionTime(currentTime);
+
+        assertThat(scheduledTime).isBetween(beforeScheduling, afterScheduling);
+    }
+
+    @Test
+    void scheduleEmailNotification_ShouldGenerateRandomCaseId() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        notificationService.scheduleEmailNotification(emailRequest);
+        notificationService.scheduleEmailNotification(emailRequest);
+
+        ArgumentCaptor<CaseNotification> notificationCaptor = ArgumentCaptor.forClass(CaseNotification.class);
+        verify(notificationRepository, times(4)).save(notificationCaptor.capture());
+
+        // Get the first saves (before status updates)
+        CaseNotification firstNotification = notificationCaptor.getAllValues().getFirst();
+        CaseNotification thirdNotification = notificationCaptor.getAllValues().get(2);
+
+        assertThat(firstNotification.getCaseId()).isNotEqualTo(thirdNotification.getCaseId());
+    }
+
+    @Test
+    void scheduleEmailNotification_ShouldHandleNullPersonalisation() {
+        EmailNotificationRequest requestWithNullPersonalisation = new EmailNotificationRequest();
+        requestWithNullPersonalisation.setEmailAddress("test@example.com");
+        requestWithNullPersonalisation.setTemplateId("template-123");
+        requestWithNullPersonalisation.setPersonalisation(null); // null personalisation
+        requestWithNullPersonalisation.setReference("notification-ref");
+        requestWithNullPersonalisation.setEmailReplyToId("reply-to-123");
+
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        EmailNotificationResponse response = notificationService
+            .scheduleEmailNotification(requestWithNullPersonalisation);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(SCHEDULED.toString());
+
+        verify(schedulerClient).scheduleIfNotExists(any(SchedulableInstance.class));
+    }
+
+    @Test
+    void scheduleEmailNotification_ShouldHandleEmptyPersonalisation() {
+        EmailNotificationRequest requestWithEmptyPersonalisation = new EmailNotificationRequest();
+        requestWithEmptyPersonalisation.setEmailAddress("test@example.com");
+        requestWithEmptyPersonalisation.setTemplateId("template-123");
+        requestWithEmptyPersonalisation.setPersonalisation(new HashMap<>()); // empty map
+        requestWithEmptyPersonalisation.setReference("notification-ref");
+        requestWithEmptyPersonalisation.setEmailReplyToId("reply-to-123");
+
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        EmailNotificationResponse response = notificationService
+            .scheduleEmailNotification(requestWithEmptyPersonalisation);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo(SCHEDULED.toString());
+
+        verify(schedulerClient).scheduleIfNotExists(any(SchedulableInstance.class));
+    }
+
+    @Test
+    void createCaseNotification_ShouldSetCorrectInitialValues() {
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
+        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+
+        notificationService.scheduleEmailNotification(emailRequest);
+
+        ArgumentCaptor<CaseNotification> notificationCaptor = ArgumentCaptor.forClass(CaseNotification.class);
+        verify(notificationRepository, times(2)).save(notificationCaptor.capture());
+
+        CaseNotification initialNotification = notificationCaptor.getAllValues().getFirst();
+        assertThat(initialNotification.getCaseId()).isNotNull();
+        assertThat(initialNotification.getStatus()).isEqualTo(PENDING_SCHEDULE);
+        assertThat(initialNotification.getType()).isEqualTo(EMAIL.toString());
+        assertThat(initialNotification.getRecipient()).isEqualTo("test@example.com");
+        assertThat(initialNotification.getNotificationId()).isNull(); // Should be null before save
+        assertThat(initialNotification.getSubmittedAt()).isNull();
+        assertThat(initialNotification.getLastUpdatedAt()).isNull();
+        assertThat(initialNotification.getProviderNotificationId()).isNull();
     }
 
     @Test
@@ -196,6 +320,49 @@ class NotificationServiceTest {
     }
 
     @Test
+    void updateNotificationStatus_ShouldPreserveExistingSubmittedAt_WhenStatusIsNotSending() {
+        Instant existingSubmittedAt = Instant.now().minusSeconds(3600);
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SENDING);
+        existingNotification.setSubmittedAt(existingSubmittedAt);
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(existingNotification);
+
+        notificationService.updateNotificationStatus(notificationId, "DELIVERED");
+
+        ArgumentCaptor<CaseNotification> captor = ArgumentCaptor.forClass(CaseNotification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        CaseNotification updatedNotification = captor.getValue();
+        assertThat(updatedNotification.getStatus()).isEqualTo(DELIVERED);
+        assertThat(updatedNotification.getSubmittedAt()).isEqualTo(existingSubmittedAt);
+        assertThat(updatedNotification.getLastUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    void updateNotificationStatus_ShouldUpdateLastUpdatedAt_ForAllStatusChanges() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
+        existingNotification.setLastUpdatedAt(Instant.now().minusSeconds(3600));
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(existingNotification);
+
+        Instant beforeUpdate = Instant.now();
+        notificationService.updateNotificationStatus(notificationId, "SENDING");
+        Instant afterUpdate = Instant.now();
+
+        ArgumentCaptor<CaseNotification> captor = ArgumentCaptor.forClass(CaseNotification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        CaseNotification updatedNotification = captor.getValue();
+        assertThat(updatedNotification.getLastUpdatedAt()).isBetween(beforeUpdate, afterUpdate);
+    }
+
+    @Test
     void updateNotificationStatus_ShouldLogError_WhenNotificationNotFound() {
         when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
 
@@ -230,53 +397,28 @@ class NotificationServiceTest {
             .thenThrow(new RuntimeException("Database error"));
 
         assertThatCode(() ->
-                           notificationService.updateNotificationStatus(notificationId, "DELIVERED")
+                            notificationService.updateNotificationStatus(notificationId, "DELIVERED")
         ).doesNotThrowAnyException();
 
         verify(notificationRepository).save(any(CaseNotification.class));
     }
 
     @Test
-    void scheduleEmailNotification_ShouldGenerateUniqueTaskIds() {
-        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
-        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+    void updateNotificationStatus_ShouldHandleAllValidStatusTransitions() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
 
-        EmailNotificationResponse response1 = notificationService.scheduleEmailNotification(emailRequest);
-        EmailNotificationResponse response2 = notificationService.scheduleEmailNotification(emailRequest);
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(existingNotification);
 
-        assertThat(response1.getTaskId()).isNotEqualTo(response2.getTaskId());
-    }
+        String[] validStatuses = {"SENDING", "DELIVERED", "SCHEDULED"};
 
-    @Test
-    void scheduleEmailNotification_ShouldScheduleTaskWithCorrectTiming() {
-        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification);
-        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
+        for (String statusString : validStatuses) {
+            notificationService.updateNotificationStatus(notificationId, statusString);
+        }
 
-        notificationService.scheduleEmailNotification(emailRequest);
-
-        ArgumentCaptor<SchedulableInstance<?>> taskCaptor = ArgumentCaptor.forClass(SchedulableInstance.class);
-        verify(schedulerClient).scheduleIfNotExists(taskCaptor.capture());
-
-        SchedulableInstance<?> scheduledTask = taskCaptor.getValue();
-        assertThat(scheduledTask).isNotNull();
-    }
-
-    @Test
-    void updateNotificationStatus_ShouldSetProviderNotificationId_WhenProvided() {
-        UUID providerNotificationId = UUID.randomUUID();
-        CaseNotification notificationWithProvider = new CaseNotification();
-        notificationWithProvider.setNotificationId(notificationId);
-        notificationWithProvider.setStatus(SCHEDULED);
-        notificationWithProvider.setProviderNotificationId(providerNotificationId);
-
-        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(savedNotification,
-                                                                                    notificationWithProvider);
-        when(schedulerClient.scheduleIfNotExists(any(SchedulableInstance.class))).thenReturn(true);
-
-        EmailNotificationResponse response = notificationService.scheduleEmailNotification(emailRequest);
-
-        assertThat(response).isNotNull();
-        verify(notificationRepository, times(2)).save(any(CaseNotification.class));
+        verify(notificationRepository, times(validStatuses.length)).save(any(CaseNotification.class));
     }
 
     @Test

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @Configuration
 @EnableJpaRepositories(basePackages = "uk.gov.hmcts.reform.enforcement.notify.repository")
 @EntityScan(basePackages = {
-    "uk.gov.hmcts.reform.enforcement.notify.domain"
+    "uk.gov.hmcts.reform.enforcement.notify.entities"
 })
 public class JpaConfig {
 }

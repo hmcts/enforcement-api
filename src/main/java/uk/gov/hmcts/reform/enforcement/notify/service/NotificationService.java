@@ -4,7 +4,7 @@ import com.github.kagkarlsson.scheduler.SchedulerClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.enforcement.notify.domain.CaseNotification;
+import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationResponse;
@@ -14,8 +14,6 @@ import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
 import uk.gov.hmcts.reform.enforcement.notify.task.SendEmailTaskComponent;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
@@ -64,7 +62,7 @@ public class NotificationService {
         );
 
         if (!scheduled) {
-            log.warn("Task with ID {} already exists", taskId);
+            log.warn("Task with ID {} already exists and has not been scheduled, ", taskId);
         }
 
         updateNotificationStatus(caseNotification, SCHEDULED, null);
@@ -75,7 +73,7 @@ public class NotificationService {
         response.setNotificationId(caseNotification.getNotificationId());
 
         log.info("Email notification scheduled with task ID: {} and notification ID: {}",
-                 taskId, caseNotification.getNotificationId());
+                    taskId, caseNotification.getNotificationId());
 
         return response;
     }
@@ -107,19 +105,11 @@ public class NotificationService {
     }
 
     public void updateNotificationStatus(UUID dbNotificationId, String statusString) {
-        Optional<CaseNotification> notificationOpt = notificationRepository.findById(dbNotificationId);
-        if (notificationOpt.isEmpty()) {
-            log.error("Notification not found with ID on status update: {}", dbNotificationId);
-            return;
-        }
-
-        CaseNotification notification = notificationOpt.get();
-        try {
-            NotificationStatus status = NotificationStatus.fromString(statusString);
-            updateNotificationStatus(notification, status, null);
-        } catch (IllegalArgumentException e) {
-            log.warn("Unknown notification status: {}", statusString);
-        }
+        notificationRepository.findById(dbNotificationId)
+            .ifPresentOrElse(
+                notification -> processStatusUpdate(notification, statusString),
+                () -> log.error("Notification not found with ID on status update: {}", dbNotificationId)
+            );
     }
 
     private void updateNotificationStatus(
@@ -129,14 +119,14 @@ public class NotificationService {
 
         try {
             notification.setStatus(status);
-            notification.setLastUpdatedAt(LocalDateTime.now());
+            notification.setLastUpdatedAt(Instant.now());
 
             if (providerNotificationId != null) {
                 notification.setProviderNotificationId(providerNotificationId);
             }
 
             if (status == NotificationStatus.SENDING) {
-                notification.setSubmittedAt(LocalDateTime.now());
+                notification.setSubmittedAt(Instant.now());
             }
 
             notificationRepository.save(notification);
@@ -145,6 +135,15 @@ public class NotificationService {
         } catch (Exception e) {
             log.error("Error updating notification status to {}: {}",
                         status, e.getMessage(), e);
+        }
+    }
+
+    private void processStatusUpdate(CaseNotification notification, String statusString) {
+        try {
+            NotificationStatus status = NotificationStatus.fromString(statusString);
+            updateNotificationStatus(notification, status, null);
+        } catch (IllegalArgumentException e) {
+            log.warn("Unknown notification status: {}", statusString);
         }
     }
 }
