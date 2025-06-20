@@ -84,7 +84,7 @@ azure:
     instrumentation-key: ${enforcement.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
 testing-support:
-  enabled: ${ENABLE_TESTING_SUPPORT:false}
+  enabled: ${ENABLE_TESTING_SUPPORT:true}
 
 # DB Scheduler Configuration
 db-scheduler:

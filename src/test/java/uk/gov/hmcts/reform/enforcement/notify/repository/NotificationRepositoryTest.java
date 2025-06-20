@@ -21,35 +21,35 @@ class NotificationRepositoryTest {
 
     @Autowired
     private NotificationRepository repository;
-    
+
     @Test
     void testFindByProviderNotificationId() {
-        
+
         UUID caseId = UUID.randomUUID();
         UUID providerNotificationId = UUID.randomUUID();
-        
+
         CaseNotification notification = new CaseNotification();
         notification.setCaseId(caseId);
         notification.setProviderNotificationId(providerNotificationId);
         notification.setStatus(NotificationStatus.SUBMITTED);
-        notification.setType(NotificationType.EMAIL);
+        notification.setType(NotificationType.EMAIL.toString());
         notification.setRecipient("test@example.com");
-        
+
         repository.save(notification);
-        
+
         Optional<CaseNotification> found = repository.findByProviderNotificationId(providerNotificationId);
-        
+
         assertThat(found).isPresent();
         assertThat(found.get().getProviderNotificationId()).isEqualTo(providerNotificationId);
         assertThat(found.get().getCaseId()).isEqualTo(caseId);
         assertThat(found.get().getStatus()).isEqualTo(NotificationStatus.SUBMITTED);
     }
-    
+
     @Test
     void testFindByProviderNotificationIdWhenNotFound() {
-        
+
         Optional<CaseNotification> found = repository.findByProviderNotificationId(UUID.randomUUID());
-        
+
         assertThat(found).isEmpty();
     }
 }
