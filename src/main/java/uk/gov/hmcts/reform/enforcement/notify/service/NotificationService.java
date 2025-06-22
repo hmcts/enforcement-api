@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
 import uk.gov.hmcts.reform.enforcement.notify.task.SendEmailTaskComponent;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.UUID.randomUUID;
@@ -58,6 +59,7 @@ public class NotificationService {
         boolean scheduled = schedulerClient.scheduleIfNotExists(
             SendEmailTaskComponent.sendEmailTask
                 .instance(taskId)
+                .data(emailState)
                 .scheduledTo(Instant.now())
         );
 
@@ -76,6 +78,30 @@ public class NotificationService {
                     taskId, caseNotification.getNotificationId());
 
         return response;
+    }
+
+    public void updateNotificationAfterSending(UUID dbNotificationId, UUID providerNotificationId) {
+        Optional<CaseNotification> notificationOpt = notificationRepository.findById(dbNotificationId);
+        if (notificationOpt.isEmpty()) {
+            log.error("Notification not found with ID: {}", dbNotificationId);
+            return;
+        }
+
+        CaseNotification notification = notificationOpt.get();
+        updateNotificationStatus(notification, NotificationStatus.SUBMITTED, providerNotificationId);
+    }
+
+    public void updateNotificationAfterFailure(UUID dbNotificationId, Exception exception) {
+        Optional<CaseNotification> notificationOpt = notificationRepository.findById(dbNotificationId);
+        if (notificationOpt.isEmpty()) {
+            log.error("Notification not found with ID on failure: {}", dbNotificationId);
+            return;
+        }
+
+        CaseNotification notification = notificationOpt.get();
+        updateNotificationStatus(notification, NotificationStatus.PERMANENT_FAILURE, null);
+        log.error("Email sending failed for notification ID: {}, error: {}",
+                    dbNotificationId, exception.getMessage());
     }
 
     private CaseNotification createCaseNotification(String recipient, UUID caseId, String taskId) {
