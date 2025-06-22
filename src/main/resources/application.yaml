@@ -85,6 +85,7 @@ notify:
     max-retries: ${NOTIFY_CHECK_STATUS_MAX_RETRIES:5}
     task-delay-seconds: ${NOTIFY_CHECK_STATUS_DELAY_SECONDS:60s}
     backoff-delay-seconds: ${NOTIFY_CHECK_STATUS_BACKOFF_DELAY_SECONDS:3600s}
+  task-processing-delay-seconds: ${NOTIFY_TASK_PROCESSING_DELAY_SECONDS:2s}
 
 azure:
   application-insights:

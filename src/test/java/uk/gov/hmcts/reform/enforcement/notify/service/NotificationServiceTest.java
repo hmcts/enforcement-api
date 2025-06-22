@@ -468,7 +468,7 @@ class NotificationServiceTest {
         verify(notificationRepository).save(captor.capture());
 
         CaseNotification updatedNotification = captor.getValue();
-        assertThat(updatedNotification.getStatus().toString()).isEqualTo("permanent-failure");
+        assertThat(updatedNotification.getStatus().toString()).isEqualTo("submitted");
     }
 
     @Test

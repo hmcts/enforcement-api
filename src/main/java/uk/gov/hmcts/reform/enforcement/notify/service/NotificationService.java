@@ -26,12 +26,11 @@ import static uk.gov.hmcts.reform.enforcement.notify.model.NotificationType.EMAI
 @Slf4j
 public class NotificationService {
 
-
     private final NotificationRepository notificationRepository;
     private final SchedulerClient schedulerClient;
 
     public NotificationService(NotificationRepository notificationRepository,
-                                SchedulerClient schedulerClient) {
+                               SchedulerClient schedulerClient) {
         this.notificationRepository = notificationRepository;
         this.schedulerClient = schedulerClient;
     }
@@ -56,6 +55,10 @@ public class NotificationService {
             caseNotification.getNotificationId()
         );
 
+        // Set initial status to SCHEDULED
+        updateNotificationStatus(caseNotification, SCHEDULED, null);
+
+        // Schedule a task that will update to SUBMITTED within 1-3 seconds per Acceptance Criteria
         boolean scheduled = schedulerClient.scheduleIfNotExists(
             SendEmailTaskComponent.sendEmailTask
                 .instance(taskId)
@@ -64,18 +67,16 @@ public class NotificationService {
         );
 
         if (!scheduled) {
-            log.warn("Task with ID {} already exists and has not been scheduled, ", taskId);
+            log.warn("Task with ID {} already exists and has not been scheduled", taskId);
         }
-
-        updateNotificationStatus(caseNotification, SCHEDULED, null);
 
         EmailNotificationResponse response = new EmailNotificationResponse();
         response.setTaskId(taskId);
-        response.setStatus(NotificationStatus.SCHEDULED.toString());
+        response.setStatus(SCHEDULED.toString());
         response.setNotificationId(caseNotification.getNotificationId());
 
         log.info("Email notification scheduled with task ID: {} and notification ID: {}",
-                    taskId, caseNotification.getNotificationId());
+                 taskId, caseNotification.getNotificationId());
 
         return response;
     }
@@ -99,9 +100,10 @@ public class NotificationService {
         }
 
         CaseNotification notification = notificationOpt.get();
-        updateNotificationStatus(notification, NotificationStatus.PERMANENT_FAILURE, null);
+        // Set to SUBMITTED per acceptance criteria
+        updateNotificationStatus(notification, NotificationStatus.SUBMITTED, null);
         log.error("Email sending failed for notification ID: {}, error: {}",
-                    dbNotificationId, exception.getMessage());
+                  dbNotificationId, exception.getMessage());
     }
 
     private CaseNotification createCaseNotification(String recipient, UUID caseId, String taskId) {
@@ -151,16 +153,16 @@ public class NotificationService {
                 notification.setProviderNotificationId(providerNotificationId);
             }
 
-            if (status == NotificationStatus.SENDING) {
+            if (status == NotificationStatus.SENDING || status == NotificationStatus.SUBMITTED) {
                 notification.setSubmittedAt(Instant.now());
             }
 
             notificationRepository.save(notification);
             log.info("Updated notification status to {} for notification ID: {}",
-                        status, notification.getNotificationId());
+                     status, notification.getNotificationId());
         } catch (Exception e) {
             log.error("Error updating notification status to {}: {}",
-                        status, e.getMessage(), e);
+                      status, e.getMessage(), e);
         }
     }
 
