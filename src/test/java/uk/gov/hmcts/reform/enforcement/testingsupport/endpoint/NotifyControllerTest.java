@@ -103,6 +103,19 @@ class NotifyControllerTest {
     }
 
     @Test
+    void sendEmail_ShouldUseDefaultAuthorization_WhenHeaderNotProvided() {
+        when(notificationService.scheduleEmailNotification(emailRequest)).thenReturn(emailResponse);
+
+        ResponseEntity<EmailNotificationResponse> response = notifyController.sendEmail(
+            "DummyId", serviceAuthorization, emailRequest);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getBody()).isEqualTo(emailResponse);
+
+        verify(notificationService).scheduleEmailNotification(emailRequest);
+    }
+
+    @Test
     void constructor_ShouldInitializeFields() {
         NotifyController controller = new NotifyController(notificationService);
         assertThat(controller).isNotNull();

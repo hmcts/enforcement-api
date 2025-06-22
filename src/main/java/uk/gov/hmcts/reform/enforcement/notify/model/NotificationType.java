@@ -7,10 +7,6 @@ public enum NotificationType {
 
     @Override
     public String toString() {
-        return switch (this) {
-            case EMAIL -> "Email";
-            case TEXT_MESSAGE -> "Text Message";
-            case LETTER -> "Letter";
-        };
+        return name();
     }
 }

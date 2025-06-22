@@ -147,7 +147,7 @@ public class SendEmailTaskComponent {
             });
     }
 
-    void updateNotificationFromStatusUpdate(NotificationStatusUpdate statusUpdate) {
+    private void updateNotificationFromStatusUpdate(NotificationStatusUpdate statusUpdate) {
         notificationService.updateNotificationStatus(
             statusUpdate.notification().getNotificationId(),
             statusUpdate.status().toString()
