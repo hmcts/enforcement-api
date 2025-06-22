@@ -422,6 +422,67 @@ class NotificationServiceTest {
     }
 
     @Test
+    void updateNotificationAfterSending_ShouldUpdateProviderNotificationId_WhenNotificationExists() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
+
+        UUID providerNotificationId = UUID.randomUUID();
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(existingNotification);
+
+        notificationService.updateNotificationAfterSending(notificationId, providerNotificationId);
+
+        ArgumentCaptor<CaseNotification> captor = ArgumentCaptor.forClass(CaseNotification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        CaseNotification updatedNotification = captor.getValue();
+        assertThat(updatedNotification.getProviderNotificationId()).isEqualTo(providerNotificationId);
+        assertThat(updatedNotification.getStatus().toString()).isEqualTo("submitted");
+    }
+
+    @Test
+    void updateNotificationAfterSending_ShouldDoNothing_WhenNotificationNotFound() {
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
+
+        notificationService.updateNotificationAfterSending(notificationId, UUID.randomUUID());
+
+        verify(notificationRepository).findById(notificationId);
+        verify(notificationRepository, never()).save(any(CaseNotification.class));
+    }
+
+    @Test
+    void updateNotificationAfterFailure_ShouldUpdateStatusToPermanentFailure_WhenNotificationExists() {
+        CaseNotification existingNotification = new CaseNotification();
+        existingNotification.setNotificationId(notificationId);
+        existingNotification.setStatus(SCHEDULED);
+
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.of(existingNotification));
+        when(notificationRepository.save(any(CaseNotification.class))).thenReturn(existingNotification);
+
+        Exception exception = new RuntimeException("Test failure");
+        notificationService.updateNotificationAfterFailure(notificationId, exception);
+
+        ArgumentCaptor<CaseNotification> captor = ArgumentCaptor.forClass(CaseNotification.class);
+        verify(notificationRepository).save(captor.capture());
+
+        CaseNotification updatedNotification = captor.getValue();
+        assertThat(updatedNotification.getStatus().toString()).isEqualTo("permanent-failure");
+    }
+
+    @Test
+    void updateNotificationAfterFailure_ShouldDoNothing_WhenNotificationNotFound() {
+        when(notificationRepository.findById(notificationId)).thenReturn(Optional.empty());
+
+        Exception exception = new RuntimeException("Test failure");
+        notificationService.updateNotificationAfterFailure(notificationId, exception);
+
+        verify(notificationRepository).findById(notificationId);
+        verify(notificationRepository, never()).save(any(CaseNotification.class));
+    }
+
+    @Test
     void constructor_ShouldInitializeFields() {
         NotificationService service = new NotificationService(notificationRepository, schedulerClient);
 
