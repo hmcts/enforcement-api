@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.enforcement.notify.task;
 
-import com.github.kagkarlsson.scheduler.task.CompletionHandler;
 import com.github.kagkarlsson.scheduler.task.TaskInstance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

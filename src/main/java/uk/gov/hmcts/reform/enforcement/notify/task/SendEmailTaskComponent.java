@@ -80,7 +80,7 @@ public class SendEmailTaskComponent {
                 }
 
                 try {
-                    // Add a small delay per processing delay variable to ensure the task appears in scheduled_tasks for 1-3 seconds
+                    // Add a small delay to ensure the task appears in scheduled_tasks for 1-3 seconds
                     Thread.sleep(processingDelay.toMillis());
                     
                     // Update to SUBMITTED status
