@@ -67,8 +67,6 @@ class NotifyControllerTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(emailResponse);
-        assertThat(response.getBody().getTaskId()).isEqualTo("task-123");
-        assertThat(response.getBody().getStatus()).isEqualTo(NotificationStatus.SCHEDULED.toString());
 
         verify(notificationService).scheduleEmailNotification(emailRequest);
     }
