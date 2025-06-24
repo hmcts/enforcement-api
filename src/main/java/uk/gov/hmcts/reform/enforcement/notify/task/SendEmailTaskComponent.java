@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.enforcement.notify.config.NotificationErrorHandler;
 import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
@@ -81,22 +80,7 @@ public class SendEmailTaskComponent {
                 }
 
                 try {
-                    // Add a small delay to ensure the task appears in scheduled_tasks for 1-3 seconds
-                    Thread.sleep(processingDelay.toMillis());
-                    
-                    // Send email in background
-                    sendEmailInBackground(emailState);
-                    
-                    // Remove the task from scheduled_tasks
-                    return new CompletionHandler.OnCompleteRemove<>();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    log.error("Task interrupted: {}", e.getMessage());
-                    // Update status to SUBMITTED in case of interruption
-                    notificationService.updateNotificationStatus(
-                        emailState.getDbNotificationId(),
-                        NotificationStatus.SUBMITTED.toString()
-                    );
+                    sendEmail(emailState);
                     return new CompletionHandler.OnCompleteRemove<>();
                 } catch (Exception e) {
                     log.error("Error in send email task: {}", e.getMessage(), e);
@@ -110,8 +94,7 @@ public class SendEmailTaskComponent {
             });
     }
 
-    @Async("notifyTaskExecutor")
-    public void sendEmailInBackground(EmailState emailState) {
+    public void sendEmail(EmailState emailState) {
         try {
             final String templateId = emailState.getTemplateId();
             final String destinationAddress = emailState.getEmailAddress();

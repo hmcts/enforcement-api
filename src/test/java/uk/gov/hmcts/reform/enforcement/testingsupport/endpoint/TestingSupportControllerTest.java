@@ -45,7 +45,6 @@ class TestingSupportControllerTest {
         authorization = "Bearer token123";
         serviceAuthorization = "ServiceAuth token456";
         
-        // Need to fix the constructor for InjectMocks to work properly with the new signature
         testingSupportController = new TestingSupportController(
             schedulerClient,
             helloWorldTask

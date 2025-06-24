@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.enforcement.notify.config.NotificationErrorHandler;
 import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailState;
+import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
 import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
 import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 import uk.gov.service.notify.NotificationClient;
@@ -142,6 +143,72 @@ class SendEmailTaskComponentTest {
             any(NotificationClientException.class)
         );
         verify(errorHandler, never()).handleSendEmailException(any(), any(), any(), any());
+    }
+
+    @Test
+    void execute_ShouldHandleNotificationNotFound() throws NotificationClientException {
+        when(notificationRepository.findById(dbNotificationId)).thenReturn(Optional.empty());
+        
+        sendEmailTaskComponent.sendEmailTask().execute(taskInstance, null);
+        
+        verify(notificationClient, never()).sendEmail(
+            anyString(), anyString(), any(), anyString()
+        );
+        verify(notificationService, never()).updateNotificationAfterSending(any(), any());
+    }
+
+    @Test
+    void execute_ShouldHandleNullNotificationId() throws Exception {
+        when(notificationRepository.findById(dbNotificationId)).thenReturn(Optional.of(caseNotification));
+        
+        SendEmailResponse response = mock(SendEmailResponse.class);
+        when(response.getNotificationId()).thenReturn(null);
+        
+        when(notificationClient.sendEmail(
+            anyString(), anyString(), any(), anyString()
+        )).thenReturn(response);
+        
+        sendEmailTaskComponent.sendEmailTask().execute(taskInstance, null);
+        
+        verify(notificationService).updateNotificationAfterFailure(
+            eq(dbNotificationId), 
+            any(IllegalStateException.class)
+        );
+    }
+
+    @Test
+    void execute_ShouldHandleGenericException() throws Exception {
+        when(notificationRepository.findById(dbNotificationId)).thenReturn(Optional.of(caseNotification));
+        
+        RuntimeException runtimeException = new RuntimeException("Test exception");
+        when(notificationClient.sendEmail(
+            anyString(), anyString(), any(), anyString()
+        )).thenThrow(runtimeException);
+        
+        sendEmailTaskComponent.sendEmailTask().execute(taskInstance, null);
+        
+        verify(notificationService).updateNotificationStatus(
+            eq(dbNotificationId),
+            eq(NotificationStatus.SUBMITTED.toString())
+        );
+    }
+
+    @Test
+    void sendEmail_ShouldUpdateNotificationAfterSending_WhenSuccessful() throws Exception {
+        SendEmailResponse response = mock(SendEmailResponse.class);
+        UUID notificationId = UUID.randomUUID();
+        when(response.getNotificationId()).thenReturn(notificationId);
+        
+        when(notificationClient.sendEmail(
+            anyString(), anyString(), any(), anyString()
+        )).thenReturn(response);
+        
+        sendEmailTaskComponent.sendEmail(emailState);
+        
+        verify(notificationService).updateNotificationAfterSending(
+            eq(dbNotificationId), 
+            eq(notificationId)
+        );
     }
 
     @Test

@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.enforcement.notify.config.NotificationErrorHandler;
 import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.helper.NotificationTestHelper;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailState;
+import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
 import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 import uk.gov.service.notify.Notification;
 import uk.gov.service.notify.NotificationClient;
@@ -93,13 +94,16 @@ class VerifyEmailTaskComponentTest {
     void execute_ShouldUpdateStatusToDelivered_WhenNotificationStatusIsDelivered() throws Exception {
         Notification notification = mock(Notification.class);
         when(notificationClient.getNotificationById(notificationId)).thenReturn(notification);
-        when(notification.getStatus()).thenReturn("delivered");
+        when(notification.getStatus()).thenReturn(NotificationStatus.DELIVERED.toString());
 
         CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
             .execute(taskInstance, executionContext);
 
         verify(notificationClient).getNotificationById(notificationId);
-        verify(notificationService).updateNotificationStatus(dbNotificationId, "delivered");
+        verify(notificationService).updateNotificationStatus(
+            dbNotificationId, 
+            NotificationStatus.DELIVERED.toString()
+        );
         assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
 
@@ -113,7 +117,10 @@ class VerifyEmailTaskComponentTest {
             .execute(taskInstance, executionContext);
 
         verify(notificationClient).getNotificationById(notificationId);
-        verify(notificationService).updateNotificationStatus(dbNotificationId, "permanent-failure");
+        verify(notificationService).updateNotificationStatus(
+            dbNotificationId, 
+            NotificationStatus.PERMANENT_FAILURE.toString()
+        );
         assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
 
@@ -144,6 +151,23 @@ class VerifyEmailTaskComponentTest {
 
         verify(notificationClient).getNotificationById(notificationId);
         verify(notificationService).updateNotificationStatus(dbNotificationId, "DELIVERED");
+        assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
+    }
+
+    @Test
+    void execute_ShouldHandleTemporaryFailureStatus() throws Exception {
+        Notification notification = mock(Notification.class);
+        when(notificationClient.getNotificationById(notificationId)).thenReturn(notification);
+        when(notification.getStatus()).thenReturn("temporary-failure");
+
+        CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
+            .execute(taskInstance, executionContext);
+
+        verify(notificationClient).getNotificationById(notificationId);
+        verify(notificationService).updateNotificationStatus(
+            dbNotificationId, 
+            NotificationStatus.PERMANENT_FAILURE.toString()
+        );
         assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
 
