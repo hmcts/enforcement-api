@@ -11,7 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import uk.gov.hmcts.reform.enforcement.notify.config.NotificationErrorHandler;
-import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.helper.NotificationTestHelper;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailState;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
@@ -26,9 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -129,15 +126,13 @@ class VerifyEmailTaskComponentTest {
         NotificationClientException clientException = 
             NotificationTestHelper.createNotificationClientException(404, "Not found");
         when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
-        doThrow(new NotificationException("Failed to fetch", clientException))
-            .when(errorHandler).handleFetchException(clientException, notificationId);
 
-        assertThatThrownBy(() -> {
-            verifyEmailTaskComponent.verifyEmailTask().execute(taskInstance, executionContext);
-        }).isInstanceOf(NotificationException.class);
+        CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
+            .execute(taskInstance, executionContext);
 
         verify(notificationClient).getNotificationById(notificationId);
         verify(errorHandler).handleFetchException(eq(clientException), eq(notificationId));
+        assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
 
     @Test
