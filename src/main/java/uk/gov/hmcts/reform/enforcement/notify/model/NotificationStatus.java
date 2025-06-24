@@ -7,8 +7,8 @@ public enum NotificationStatus {
     PERMANENT_FAILURE("permanent-failure"),
     TEMPORARY_FAILURE("temporary-failure"),
     TECHNICAL_FAILURE("technical-failure"),
-    SCHEDULE("scheduled"),
-    PENDING_SCHEDULE("pending-schedule"), 
+    SCHEDULED("scheduled"),
+    PENDING_SCHEDULE("pending-schedule"),
     SUBMITTED("submitted");
 
     private final String apiValue;
@@ -26,12 +26,12 @@ public enum NotificationStatus {
         return apiValue;
     }
 
-    public static NotificationStatus fromApiValue(String apiValue) {
+    public static NotificationStatus fromString(String status) {
         for (NotificationStatus notificationStatus : NotificationStatus.values()) {
-            if (notificationStatus.apiValue.equalsIgnoreCase(apiValue)) {
+            if (notificationStatus.apiValue.equalsIgnoreCase(status)) {
                 return notificationStatus;
             }
         }
-        throw new IllegalArgumentException("Unknown status: " + apiValue);
+        throw new IllegalArgumentException("Unknown status: " + status);
     }
 }
