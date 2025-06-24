@@ -101,7 +101,10 @@ class SendEmailTaskComponentTest {
         
         sendEmailTaskComponent.sendEmailTask().execute(taskInstance, null);
         
-        verify(notificationService).updateNotificationStatus(eq(dbNotificationId), eq("submitted"));
+        verify(notificationService).updateNotificationAfterSending(
+            eq(dbNotificationId), 
+            eq(notificationId)
+        );
     }
 
     @Test
@@ -116,7 +119,10 @@ class SendEmailTaskComponentTest {
         
         sendEmailTaskComponent.sendEmailTask().execute(taskInstance, null);
         
-        verify(notificationService).updateNotificationStatus(eq(dbNotificationId), eq("submitted"));
+        verify(notificationService).updateNotificationAfterFailure(
+            eq(dbNotificationId), 
+            any(NotificationClientException.class)
+        );
     }
 
     @Test
@@ -131,7 +137,10 @@ class SendEmailTaskComponentTest {
         
         sendEmailTaskComponent.sendEmailTask().execute(taskInstance, null);
         
-        verify(notificationService).updateNotificationStatus(eq(dbNotificationId), eq("submitted"));
+        verify(notificationService).updateNotificationAfterFailure(
+            eq(dbNotificationId),
+            any(NotificationClientException.class)
+        );
         verify(errorHandler, never()).handleSendEmailException(any(), any(), any(), any());
     }
 

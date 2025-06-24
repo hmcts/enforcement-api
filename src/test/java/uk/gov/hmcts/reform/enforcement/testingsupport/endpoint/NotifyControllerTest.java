@@ -65,7 +65,7 @@ class NotifyControllerTest {
         ResponseEntity<EmailNotificationResponse> response = notifyController.sendEmail(
             authorization, serviceAuthorization, emailRequest);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(emailResponse);
         assertThat(response.getBody().getTaskId()).isEqualTo("task-123");
         assertThat(response.getBody().getStatus()).isEqualTo(NotificationStatus.SCHEDULED.toString());
@@ -109,7 +109,7 @@ class NotifyControllerTest {
         ResponseEntity<EmailNotificationResponse> response = notifyController.sendEmail(
             "DummyId", serviceAuthorization, emailRequest);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.ACCEPTED);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(emailResponse);
 
         verify(notificationService).scheduleEmailNotification(emailRequest);
