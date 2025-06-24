@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.enforcement.notify.config.NotificationErrorHandler;
 import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailState;
+import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
 import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
 import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 import uk.gov.service.notify.NotificationClient;
@@ -83,12 +84,6 @@ public class SendEmailTaskComponent {
                     // Add a small delay to ensure the task appears in scheduled_tasks for 1-3 seconds
                     Thread.sleep(processingDelay.toMillis());
                     
-                    // Update to SUBMITTED status
-                    notificationService.updateNotificationStatus(
-                        emailState.getDbNotificationId(),
-                        "submitted"
-                    );
-                    
                     // Send email in background
                     sendEmailInBackground(emailState);
                     
@@ -97,13 +92,18 @@ public class SendEmailTaskComponent {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     log.error("Task interrupted: {}", e.getMessage());
+                    // Update status to SUBMITTED in case of interruption
+                    notificationService.updateNotificationStatus(
+                        emailState.getDbNotificationId(),
+                        NotificationStatus.SUBMITTED.toString()
+                    );
                     return new CompletionHandler.OnCompleteRemove<>();
                 } catch (Exception e) {
                     log.error("Error in send email task: {}", e.getMessage(), e);
-                    // Still update to SUBMITTED per acceptance criteria
+                    // Update to SUBMITTED per acceptance criteria
                     notificationService.updateNotificationStatus(
                         emailState.getDbNotificationId(),
-                        "submitted"
+                        NotificationStatus.SUBMITTED.toString()
                     );
                     return new CompletionHandler.OnCompleteRemove<>();
                 }
@@ -126,6 +126,7 @@ public class SendEmailTaskComponent {
             );
 
             if (response.getNotificationId() != null) {
+                // Update status to SUBMITTED and save provider notification ID
                 notificationService.updateNotificationAfterSending(
                     emailState.getDbNotificationId(),
                     response.getNotificationId()
@@ -140,7 +141,7 @@ public class SendEmailTaskComponent {
             }
         } catch (NotificationClientException e) {
             log.error("NotificationClient error sending email: {}", e.getMessage(), e);
-            // Both permanent and temporary failures get SUBMITTED status per Acceptance Criteria
+            // Update to SUBMITTED even on failure per acceptance criteria
             notificationService.updateNotificationAfterFailure(
                 emailState.getDbNotificationId(),
                 e

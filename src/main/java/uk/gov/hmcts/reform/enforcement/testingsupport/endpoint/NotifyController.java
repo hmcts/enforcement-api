@@ -39,7 +39,7 @@ public class NotifyController {
             EmailNotificationResponse response = notificationService.scheduleEmailNotification(emailRequest);
 
             log.info("Email notification scheduled successfully with task ID: {}", response.getTaskId());
-            return ResponseEntity.accepted().body(response);
+            return ResponseEntity.ok().body(response);
 
         } catch (Exception e) {
             log.error("Failed to schedule email notification: {}", e.getMessage(), e);
