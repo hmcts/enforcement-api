@@ -3,35 +3,22 @@ package uk.gov.hmcts.reform.enforcement.testingsupport.endpoint;
 import com.github.kagkarlsson.scheduler.SchedulerClient;
 import com.github.kagkarlsson.scheduler.task.Task;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationRequest;
-import uk.gov.hmcts.reform.enforcement.notify.model.EmailNotificationResponse;
-import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 
 import java.time.Instant;
 import java.util.UUID;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
-/*
-    This is a temporary endpoint created purely for testing the integration with Gov Notify, and will be removed once
-    events are added to our service, DO NOT USE for any future events.
-*/
 
 @Slf4j
 @RestController
@@ -40,42 +27,15 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Tag(name = "Testing Support")
 public class TestingSupportController {
 
-    private final NotificationService notificationService;
     private final SchedulerClient schedulerClient;
     private final Task<Void> helloWorldTask;
 
     public TestingSupportController(
-        NotificationService notificationService,
         SchedulerClient schedulerClient,
         @Qualifier("helloWorldTask") Task<Void> helloWorldTask
     ) {
-        this.notificationService = notificationService;
         this.schedulerClient = schedulerClient;
         this.helloWorldTask = helloWorldTask;
-    }
-
-    @PostMapping(value = "/send-email", consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "202", description = "Email notification scheduled successfully",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = EmailNotificationResponse.class))),
-    })
-    public ResponseEntity<EmailNotificationResponse> sendEmail(
-        @RequestHeader(value = AUTHORIZATION, defaultValue = "DummyId") String authorisation,
-        @RequestHeader(value = "ServiceAuthorization") String serviceAuthorization,
-        @RequestBody EmailNotificationRequest emailRequest) {
-        log.debug("Received request to send email to {}", emailRequest.getEmailAddress());
-
-        try {
-            EmailNotificationResponse response = notificationService.scheduleEmailNotification(emailRequest);
-
-            log.info("Email notification scheduled successfully with task ID: {}", response.getTaskId());
-            return ResponseEntity.accepted().body(response);
-
-        } catch (Exception e) {
-            log.error("Failed to schedule email notification: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().build();
-        }
     }
 
     @PostMapping("/create-sample-job")
