@@ -131,7 +131,11 @@ class VerifyEmailTaskComponentTest {
             .execute(taskInstance, executionContext);
 
         verify(notificationClient).getNotificationById(notificationId);
-        verify(errorHandler).handleFetchException(eq(clientException), eq(notificationId));
+        verify(errorHandler).handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(dbNotificationId)
+        );
         assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
 
@@ -162,6 +166,24 @@ class VerifyEmailTaskComponentTest {
         verify(notificationService).updateNotificationStatus(
             dbNotificationId, 
             NotificationStatus.PERMANENT_FAILURE.toString()
+        );
+        assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
+    }
+
+    @Test
+    void execute_ShouldHandleOtherNotificationClientExceptions() throws Exception {
+        NotificationClientException clientException = 
+            NotificationTestHelper.createNotificationClientException(500, "Server error");
+        when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
+
+        CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
+            .execute(taskInstance, executionContext);
+
+        verify(notificationClient).getNotificationById(notificationId);
+        verify(errorHandler).handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(dbNotificationId)
         );
         assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
