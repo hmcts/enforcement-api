@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.enforcement.notify.task;
 
 import com.github.kagkarlsson.scheduler.task.CompletionHandler;
 import com.github.kagkarlsson.scheduler.task.FailureHandler;
+import com.github.kagkarlsson.scheduler.task.SchedulableInstance;
 import com.github.kagkarlsson.scheduler.task.TaskDescriptor;
+import com.github.kagkarlsson.scheduler.task.TaskInstance;
 import com.github.kagkarlsson.scheduler.task.helper.CustomTask;
 import com.github.kagkarlsson.scheduler.task.helper.Tasks;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.enforcement.notify.config.NotificationErrorHandler;
 import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
+import uk.gov.hmcts.reform.enforcement.notify.exception.PermanentNotificationException;
+import uk.gov.hmcts.reform.enforcement.notify.exception.TemporaryNotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailState;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
 import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
@@ -21,9 +25,12 @@ import uk.gov.service.notify.NotificationClientException;
 import uk.gov.service.notify.SendEmailResponse;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import static uk.gov.hmcts.reform.enforcement.notify.task.VerifyEmailTaskComponent.verifyEmailTask;
 
 @Component
 @Slf4j
@@ -40,6 +47,7 @@ public class SendEmailTaskComponent {
     private final int maxRetriesSendEmail;
     private final Duration sendingBackoffDelay;
     private final Duration processingDelay;
+    private final Duration statusCheckTaskDelay;
 
     @Autowired
     public SendEmailTaskComponent(
@@ -49,7 +57,8 @@ public class SendEmailTaskComponent {
         NotificationRepository notificationRepository,
         @Value("${notify.send-email.max-retries:5}") int maxRetriesSendEmail,
         @Value("${notify.send-email.backoff-delay-seconds:300s}") Duration sendingBackoffDelay,
-        @Value("${notify.task-processing-delay-seconds:2s}") Duration processingDelay
+        @Value("${notify.task-processing-delay-seconds:2s}") Duration processingDelay,
+        @Value("${notify.check-status.task-delay-seconds:60s}") Duration statusCheckTaskDelay
     ) {
         this.notificationService = notificationService;
         this.notificationClient = notificationClient;
@@ -58,6 +67,7 @@ public class SendEmailTaskComponent {
         this.maxRetriesSendEmail = maxRetriesSendEmail;
         this.sendingBackoffDelay = sendingBackoffDelay;
         this.processingDelay = processingDelay;
+        this.statusCheckTaskDelay = statusCheckTaskDelay;
     }
 
     @Bean
@@ -79,60 +89,96 @@ public class SendEmailTaskComponent {
                     return new CompletionHandler.OnCompleteRemove<>();
                 }
 
+                CaseNotification caseNotification = notificationOpt.get();
+
                 try {
-                    sendEmail(emailState);
-                    return new CompletionHandler.OnCompleteRemove<>();
-                } catch (Exception e) {
-                    log.error("Error in send email task: {}", e.getMessage(), e);
-                    // Update to SUBMITTED per acceptance criteria
                     notificationService.updateNotificationStatus(
                         emailState.getDbNotificationId(),
                         NotificationStatus.SUBMITTED.toString()
                     );
-                    return new CompletionHandler.OnCompleteRemove<>();
+                    
+                    final String templateId = emailState.getTemplateId();
+                    final String destinationAddress = emailState.getEmailAddress();
+                    final Map<String, Object> personalisation = emailState.getPersonalisation();
+                    final String referenceId = UUID.randomUUID().toString();
+
+                    SendEmailResponse response = notificationClient.sendEmail(
+                        templateId,
+                        destinationAddress,
+                        personalisation,
+                        referenceId
+                    );
+
+                    if (response.getNotificationId() == null) {
+                        log.error("Email service returned null notification ID for task: {}", emailState.getId());
+                        throw new PermanentNotificationException("Null notification ID from email service",
+                                                                 new IllegalStateException(
+                                                                     "Email service returned null notification ID"));
+                    }
+
+                    notificationService.updateNotificationAfterSending(
+                        emailState.getDbNotificationId(),
+                        response.getNotificationId()
+                    );
+
+                    String notificationId = response.getNotificationId().toString();
+                    log.info("Request sent successfully. Notification ID: {}", notificationId);
+
+                    EmailState nextState = emailState.toBuilder()
+                        .notificationId(notificationId)
+                        .build();
+
+                    return new CompletionHandler.OnCompleteReplace<>(
+                        currentInstance -> SchedulableInstance.of(
+                            new TaskInstance<>(
+                                verifyEmailTask.getTaskName(),
+                                currentInstance.getId(), 
+                                nextState
+                            ),
+                            Instant.now().plus(statusCheckTaskDelay)
+                        )
+                    );
+                } catch (NotificationClientException e) {
+                    log.error("NotificationClient error sending email: {}", e.getMessage(), e);
+
+                    if (isPermanentFailure(e)) {
+                        errorHandler.handleSendEmailException(
+                            e,
+                            caseNotification,
+                            UUID.randomUUID().toString(),
+                            this::updateNotificationFromStatusUpdate
+                        );
+                        
+                        String dummyNotificationId = UUID.randomUUID().toString();
+                        EmailState nextState = emailState.toBuilder()
+                            .notificationId(dummyNotificationId)
+                            .build();
+                            
+                        return new CompletionHandler.OnCompleteReplace<>(
+                            currentInstance -> SchedulableInstance.of(
+                                new TaskInstance<>(
+                                    verifyEmailTask.getTaskName(),
+                                    currentInstance.getId(), 
+                                    nextState
+                                ),
+                                Instant.now().plus(statusCheckTaskDelay)
+                            )
+                        );
+                    } else {
+                        throw new TemporaryNotificationException("Email temporarily failed to send.", e);
+                    }
                 }
             });
     }
 
-    public void sendEmail(EmailState emailState) {
-        try {
-            final String templateId = emailState.getTemplateId();
-            final String destinationAddress = emailState.getEmailAddress();
-            final Map<String, Object> personalisation = emailState.getPersonalisation();
-            final String referenceId = UUID.randomUUID().toString();
-
-            SendEmailResponse response = notificationClient.sendEmail(
-                templateId,
-                destinationAddress,
-                personalisation,
-                referenceId
-            );
-
-            if (response.getNotificationId() != null) {
-                // Update status to SUBMITTED and save provider notification ID
-                notificationService.updateNotificationAfterSending(
-                    emailState.getDbNotificationId(),
-                    response.getNotificationId()
-                );
-                log.info("Request sent successfully. Notification ID: {}", response.getNotificationId());
-            } else {
-                log.error("Email service returned null notification ID for task: {}", emailState.getId());
-                notificationService.updateNotificationAfterFailure(
-                    emailState.getDbNotificationId(),
-                    new IllegalStateException("Null notification ID from email service")
-                );
-            }
-        } catch (NotificationClientException e) {
-            log.error("NotificationClient error sending email: {}", e.getMessage(), e);
-            // Update to SUBMITTED even on failure per acceptance criteria
-            notificationService.updateNotificationAfterFailure(
-                emailState.getDbNotificationId(),
-                e
-            );
-        }
+    private void updateNotificationFromStatusUpdate(NotificationErrorHandler.NotificationStatusUpdate statusUpdate) {
+        notificationService.updateNotificationStatus(
+            statusUpdate.notification().getNotificationId(),
+            statusUpdate.status().toString()
+        );
     }
 
-    boolean isPermanentFailure(NotificationClientException e) {
+    private boolean isPermanentFailure(NotificationClientException e) {
         int httpStatusCode = e.getHttpResult();
         return httpStatusCode == 400 || httpStatusCode == 403;
     }
