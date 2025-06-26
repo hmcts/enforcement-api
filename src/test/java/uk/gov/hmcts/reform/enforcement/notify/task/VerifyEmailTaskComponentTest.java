@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.enforcement.notify.task;
 import com.github.kagkarlsson.scheduler.task.CompletionHandler;
 import com.github.kagkarlsson.scheduler.task.ExecutionContext;
 import com.github.kagkarlsson.scheduler.task.TaskInstance;
+import com.github.kagkarlsson.scheduler.task.helper.CustomTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import uk.gov.hmcts.reform.enforcement.notify.config.NotificationErrorHandler;
+import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.helper.NotificationTestHelper;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailState;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
@@ -25,8 +27,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.lenient;
@@ -191,5 +197,85 @@ class VerifyEmailTaskComponentTest {
     @Test
     void verifyEmailTask_ShouldReturnCustomTask() {
         assertThat(verifyEmailTaskComponent.verifyEmailTask()).isNotNull();
+    }
+    
+    @Test
+    void execute_ShouldHandleExceptionFromErrorHandler() throws Exception {
+        NotificationClientException clientException = 
+            NotificationTestHelper.createNotificationClientException(404, "Not found");
+        when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
+        
+        NotificationException handlerException = new NotificationException("Error handling notification", new RuntimeException());
+        doThrow(handlerException).when(errorHandler).handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(dbNotificationId)
+        );
+
+        CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
+            .execute(taskInstance, executionContext);
+
+        verify(notificationClient).getNotificationById(notificationId);
+        verify(errorHandler).handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(dbNotificationId)
+        );
+        assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
+    }
+    
+    @Test
+    void execute_ShouldLogStatusOutcomes() throws Exception {
+        Notification deliveredNotification = mock(Notification.class);
+        when(notificationClient.getNotificationById(notificationId)).thenReturn(deliveredNotification);
+        when(deliveredNotification.getStatus()).thenReturn(NotificationStatus.DELIVERED.toString());
+
+        verifyEmailTaskComponent.verifyEmailTask().execute(taskInstance, executionContext);
+        
+        Notification failedNotification = mock(Notification.class);
+        when(notificationClient.getNotificationById(notificationId)).thenReturn(failedNotification);
+        when(failedNotification.getStatus()).thenReturn("failed");
+        
+        verifyEmailTaskComponent.verifyEmailTask().execute(taskInstance, executionContext);
+        
+        verify(notificationClient, times(2)).getNotificationById(notificationId);
+        verify(notificationService).updateNotificationStatus(
+            dbNotificationId, 
+            NotificationStatus.DELIVERED.toString()
+        );
+        verify(notificationService).updateNotificationStatus(
+            dbNotificationId, 
+            NotificationStatus.PERMANENT_FAILURE.toString()
+        );
+    }
+    
+    @Test
+    void taskDescriptor_ShouldHaveCorrectNameAndType() {
+        assertThat(VerifyEmailTaskComponent.verifyEmailTask.getTaskName()).isEqualTo("verify-email-task");
+        assertThat(VerifyEmailTaskComponent.verifyEmailTask.getDataClass()).isEqualTo(EmailState.class);
+    }
+    
+    @Test
+    void execute_ShouldIgnoreNullDbNotificationId() throws Exception {
+        EmailState stateWithNullDbId = emailState.toBuilder()
+            .dbNotificationId(null)
+            .build();
+        when(taskInstance.getData()).thenReturn(stateWithNullDbId);
+        
+        NotificationClientException clientException = 
+            NotificationTestHelper.createNotificationClientException(404, "Not found");
+        when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
+
+        CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
+            .execute(taskInstance, executionContext);
+
+        verify(notificationClient).getNotificationById(notificationId);
+        verify(errorHandler).handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(null)
+        );
+        verify(notificationService, never()).updateNotificationStatus(any(), any());
+        assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
 }
