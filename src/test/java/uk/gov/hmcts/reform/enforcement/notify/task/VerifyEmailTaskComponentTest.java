@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.enforcement.notify.task;
 import com.github.kagkarlsson.scheduler.task.CompletionHandler;
 import com.github.kagkarlsson.scheduler.task.ExecutionContext;
 import com.github.kagkarlsson.scheduler.task.TaskInstance;
-import com.github.kagkarlsson.scheduler.task.helper.CustomTask;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -205,7 +204,10 @@ class VerifyEmailTaskComponentTest {
             NotificationTestHelper.createNotificationClientException(404, "Not found");
         when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
         
-        NotificationException handlerException = new NotificationException("Error handling notification", new RuntimeException());
+        NotificationException handlerException = new NotificationException(
+            "Error handling notification", 
+            new RuntimeException()
+        );
         doThrow(handlerException).when(errorHandler).handleFetchException(
             eq(clientException), 
             eq(notificationId), 
