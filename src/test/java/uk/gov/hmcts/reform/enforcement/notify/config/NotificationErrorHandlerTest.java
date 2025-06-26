@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.enforcement.notify.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
+import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
 import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 import uk.gov.service.notify.NotificationClientException;
 
@@ -114,10 +117,12 @@ class NotificationErrorHandlerTest {
 
         UUID dbNotificationId = UUID.randomUUID();
 
-        try {
-            errorHandler.handleFetchException(exception, "notification-id", dbNotificationId);
-        } catch (Exception e) {
-            assertEquals("Failed to fetch notification, please try again.", e.getMessage());
-        }
+        boolean result = errorHandler.handleFetchException(exception, "notification-id", dbNotificationId);
+        
+        assertTrue(result);
+        verify(notificationService).updateNotificationStatus(
+            dbNotificationId,
+            NotificationStatus.PERMANENT_FAILURE.toString()
+        );
     }
 }

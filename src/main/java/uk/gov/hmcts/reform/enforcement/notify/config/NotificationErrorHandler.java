@@ -100,10 +100,11 @@ public class NotificationErrorHandler {
      * @param exception       The exception thrown during the fetch operation
      * @param notificationId  The provider notification ID that failed to fetch
      * @param dbNotificationId The database notification ID to update on 404 errors
+     * @return boolean indicating if this was a 404 error that was handled (true) or another error (false)
      */
-    public void handleFetchException(NotificationClientException exception, 
-                                    String notificationId, 
-                                    UUID dbNotificationId) {
+    public boolean handleFetchException(NotificationClientException exception, 
+                                     String notificationId, 
+                                     UUID dbNotificationId) {
         int httpStatusCode = exception.getHttpResult();
 
         log.error("Failed to fetch notification. ID: {}. Status Code: {}. Reason: {}",
@@ -119,6 +120,7 @@ public class NotificationErrorHandler {
                 dbNotificationId,
                 NotificationStatus.PERMANENT_FAILURE.toString()
             );
+            return true;
         }
         
         throw new NotificationException("Failed to fetch notification, please try again.", exception);

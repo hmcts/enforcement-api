@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -131,6 +132,11 @@ class VerifyEmailTaskComponentTest {
         NotificationClientException clientException = 
             NotificationTestHelper.createNotificationClientException(404, "Not found");
         when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
+        when(errorHandler.handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(dbNotificationId)
+        )).thenReturn(true);
 
         CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
             .execute(taskInstance, executionContext);
@@ -180,9 +186,16 @@ class VerifyEmailTaskComponentTest {
         NotificationClientException clientException = 
             NotificationTestHelper.createNotificationClientException(500, "Server error");
         when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
+        when(errorHandler.handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(dbNotificationId)
+        )).thenReturn(false);
 
-        CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
-            .execute(taskInstance, executionContext);
+        assertThatThrownBy(() -> verifyEmailTaskComponent.verifyEmailTask()
+            .execute(taskInstance, executionContext))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Failed to handle notification exception");
 
         verify(notificationClient).getNotificationById(notificationId);
         verify(errorHandler).handleFetchException(
@@ -190,7 +203,6 @@ class VerifyEmailTaskComponentTest {
             eq(notificationId), 
             eq(dbNotificationId)
         );
-        assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
 
     @Test
@@ -214,8 +226,10 @@ class VerifyEmailTaskComponentTest {
             eq(dbNotificationId)
         );
 
-        CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
-            .execute(taskInstance, executionContext);
+        assertThatThrownBy(() -> verifyEmailTaskComponent.verifyEmailTask()
+            .execute(taskInstance, executionContext))
+            .isInstanceOf(NotificationException.class)
+            .hasMessage("Error handling notification");
 
         verify(notificationClient).getNotificationById(notificationId);
         verify(errorHandler).handleFetchException(
@@ -223,7 +237,6 @@ class VerifyEmailTaskComponentTest {
             eq(notificationId), 
             eq(dbNotificationId)
         );
-        assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
     }
     
     @Test
@@ -267,6 +280,11 @@ class VerifyEmailTaskComponentTest {
         NotificationClientException clientException = 
             NotificationTestHelper.createNotificationClientException(404, "Not found");
         when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
+        when(errorHandler.handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(null)
+        )).thenReturn(true);
 
         CompletionHandler<EmailState> result = verifyEmailTaskComponent.verifyEmailTask()
             .execute(taskInstance, executionContext);
@@ -279,5 +297,29 @@ class VerifyEmailTaskComponentTest {
         );
         verify(notificationService, never()).updateNotificationStatus(any(), any());
         assertThat(result).isInstanceOf(CompletionHandler.OnCompleteRemove.class);
+    }
+    
+    @Test
+    void executionError() throws Exception {
+        NotificationClientException clientException = 
+            NotificationTestHelper.createNotificationClientException(500, "Server error");
+        when(notificationClient.getNotificationById(notificationId)).thenThrow(clientException);
+        when(errorHandler.handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(dbNotificationId)
+        )).thenReturn(false);
+
+        assertThatThrownBy(() -> verifyEmailTaskComponent.verifyEmailTask()
+            .execute(taskInstance, executionContext))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("Failed to handle notification exception");
+
+        verify(notificationClient).getNotificationById(notificationId);
+        verify(errorHandler).handleFetchException(
+            eq(clientException), 
+            eq(notificationId), 
+            eq(dbNotificationId)
+        );
     }
 }
