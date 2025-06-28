@@ -87,9 +87,16 @@ public class VerifyEmailTaskComponent {
                     return new CompletionHandler.OnCompleteRemove<>();
                 } catch (NotificationClientException e) {
                     log.error("Failed to verify status due to API error", e);
-
-                    errorHandler.handleFetchException(e, emailState.getNotificationId());
-                    return new CompletionHandler.OnCompleteRemove<>();
+                    
+                    boolean handled404 = errorHandler.handleFetchException(
+                        e, 
+                        emailState.getNotificationId(), 
+                        emailState.getDbNotificationId()
+                    );
+                    if (handled404) {
+                        return new CompletionHandler.OnCompleteRemove<>();
+                    }
+                    throw new RuntimeException("Failed to handle notification exception", e);
                 }
             });
     }

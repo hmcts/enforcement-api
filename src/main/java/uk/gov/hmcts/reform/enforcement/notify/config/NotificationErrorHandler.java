@@ -1,11 +1,13 @@
 package uk.gov.hmcts.reform.enforcement.notify.config;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.exception.NotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.exception.TemporaryNotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
+import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 import uk.gov.service.notify.NotificationClientException;
 
 import java.util.UUID;
@@ -14,6 +16,13 @@ import java.util.function.Consumer;
 @Component
 @Slf4j
 public class NotificationErrorHandler {
+
+    private final NotificationService notificationService;
+    
+    @Autowired
+    public NotificationErrorHandler(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     /**
      * Handles exceptions occurring during the process of sending an email notification.
@@ -41,7 +50,7 @@ public class NotificationErrorHandler {
             case 400, 403 -> {
                 statusUpdater.accept(new NotificationStatusUpdate(
                     caseNotification,
-                    NotificationStatus.PERMANENT_FAILURE,
+                    NotificationStatus.SUBMITTED,
                     null
                 ));
             }
@@ -68,9 +77,8 @@ public class NotificationErrorHandler {
      * Handles exceptions that occur during the fetch notification process by logging the error details
      * and rethrowing a custom {@code NotificationException}.
      *
-     * @param exception       The exception thrown during the fetch operation, containing details such as HTTP status
-     *                         code.
-     * @param notificationId  The unique identifier of the notification that failed to fetch.
+     * @param exception       The exception thrown during the fetch operation
+     * @param notificationId  The provider notification ID that failed to fetch
      */
     public void handleFetchException(NotificationClientException exception, String notificationId) {
         int httpStatusCode = exception.getHttpResult();
@@ -82,6 +90,39 @@ public class NotificationErrorHandler {
                     exception
         );
 
+        throw new NotificationException("Failed to fetch notification, please try again.", exception);
+    }
+    
+    /**
+     * Handles exceptions that occur during the fetch notification process, including updating
+     * the notification status for 404 errors.
+     *
+     * @param exception       The exception thrown during the fetch operation
+     * @param notificationId  The provider notification ID that failed to fetch
+     * @param dbNotificationId The database notification ID to update on 404 errors
+     * @return boolean indicating if this was a 404 error that was handled (true) or another error (false)
+     */
+    public boolean handleFetchException(NotificationClientException exception, 
+                                     String notificationId, 
+                                     UUID dbNotificationId) {
+        int httpStatusCode = exception.getHttpResult();
+
+        log.error("Failed to fetch notification. ID: {}. Status Code: {}. Reason: {}",
+                    notificationId,
+                    httpStatusCode,
+                    exception.getMessage(),
+                    exception
+        );
+        
+        if (httpStatusCode == 404 && dbNotificationId != null) {
+            log.info("Notification not found (404), setting status to PERMANENT_FAILURE for ID: {}", dbNotificationId);
+            notificationService.updateNotificationStatus(
+                dbNotificationId,
+                NotificationStatus.PERMANENT_FAILURE.toString()
+            );
+            return true;
+        }
+        
         throw new NotificationException("Failed to fetch notification, please try again.", exception);
     }
 
