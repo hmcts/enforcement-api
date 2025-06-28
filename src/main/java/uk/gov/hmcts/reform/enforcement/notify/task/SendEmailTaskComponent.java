@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.enforcement.notify.entities.CaseNotification;
 import uk.gov.hmcts.reform.enforcement.notify.exception.PermanentNotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.exception.TemporaryNotificationException;
 import uk.gov.hmcts.reform.enforcement.notify.model.EmailState;
-import uk.gov.hmcts.reform.enforcement.notify.model.NotificationStatus;
 import uk.gov.hmcts.reform.enforcement.notify.repository.NotificationRepository;
 import uk.gov.hmcts.reform.enforcement.notify.service.NotificationService;
 import uk.gov.service.notify.NotificationClient;
@@ -92,11 +91,6 @@ public class SendEmailTaskComponent {
                 CaseNotification caseNotification = notificationOpt.get();
 
                 try {
-                    notificationService.updateNotificationStatus(
-                        emailState.getDbNotificationId(),
-                        NotificationStatus.SUBMITTED.toString()
-                    );
-                    
                     final String templateId = emailState.getTemplateId();
                     final String destinationAddress = emailState.getEmailAddress();
                     final Map<String, Object> personalisation = emailState.getPersonalisation();

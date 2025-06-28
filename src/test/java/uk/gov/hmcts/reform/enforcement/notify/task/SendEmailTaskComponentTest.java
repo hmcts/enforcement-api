@@ -153,11 +153,7 @@ class SendEmailTaskComponentTest {
 
             verify(notificationClient).sendEmail(eq(templateId), eq(emailAddress), eq(personalisation), anyString());
             verify(notificationService).updateNotificationAfterSending(dbNotificationId, notificationId);
-            verify(notificationService).updateNotificationStatus(
-                dbNotificationId, 
-                NotificationStatus.SUBMITTED.toString()
-            );
-
+            
             assertThat(result).isInstanceOf(CompletionHandler.OnCompleteReplace.class);
         }
 
@@ -248,10 +244,6 @@ class SendEmailTaskComponentTest {
                 .hasMessage("Null notification ID from email service");
 
             verify(notificationService, never()).updateNotificationAfterSending(any(), any());
-            verify(notificationService).updateNotificationStatus(
-                dbNotificationId, 
-                NotificationStatus.SUBMITTED.toString()
-            );
         }
     }
 
@@ -274,11 +266,12 @@ class SendEmailTaskComponentTest {
 
             CompletionHandler<EmailState> result = task.execute(taskInstance, executionContext);
 
-            verify(errorHandler).handleSendEmailException(eq(exception), eq(caseNotification), anyString(), any());
-            verify(notificationService).updateNotificationStatus(
-                dbNotificationId, 
-                NotificationStatus.SUBMITTED.toString()
-            );
+            verify(errorHandler).handleSendEmailException(
+                eq(exception), 
+                eq(caseNotification), 
+                anyString(), 
+                any()
+            );            
             assertThat(result).isInstanceOf(CompletionHandler.OnCompleteReplace.class);
         }
 
@@ -298,10 +291,6 @@ class SendEmailTaskComponentTest {
             CompletionHandler<EmailState> result = task.execute(taskInstance, executionContext);
 
             verify(errorHandler).handleSendEmailException(eq(exception), eq(caseNotification), anyString(), any());
-            verify(notificationService).updateNotificationStatus(
-                dbNotificationId, 
-                NotificationStatus.SUBMITTED.toString()
-            );
             assertThat(result).isInstanceOf(CompletionHandler.OnCompleteReplace.class);
         }
 
@@ -328,11 +317,7 @@ class SendEmailTaskComponentTest {
                     .isInstanceOf(TemporaryNotificationException.class)
                     .hasMessage("Email temporarily failed to send.")
                     .hasCause(exception);
-
-                verify(notificationService).updateNotificationStatus(
-                    dbNotificationId, 
-                    NotificationStatus.SUBMITTED.toString()
-                );
+                
                 verify(notificationService, never()).updateNotificationAfterSending(any(), any());
                 verifyNoInteractions(errorHandler);
             }
@@ -622,7 +607,7 @@ class SendEmailTaskComponentTest {
                 .thenReturn(sendEmailResponse);
                 
             doThrow(new RuntimeException("Database error")).when(notificationService)
-                .updateNotificationStatus(dbNotificationId, NotificationStatus.SUBMITTED.toString());
+                .updateNotificationAfterSending(dbNotificationId, notificationId);
 
             CustomTask<EmailState> task = sendEmailTaskComponent.sendEmailTask();
 
@@ -631,11 +616,8 @@ class SendEmailTaskComponentTest {
                 .hasMessage("Database error");
 
             verify(notificationRepository).findById(dbNotificationId);
-            verify(notificationService).updateNotificationStatus(
-                dbNotificationId, 
-                NotificationStatus.SUBMITTED.toString()
-            );
-            verify(notificationClient, never()).sendEmail(anyString(), anyString(), any(), anyString());
+            verify(notificationClient).sendEmail(anyString(), anyString(), any(), anyString());
+            verify(notificationService).updateNotificationAfterSending(dbNotificationId, notificationId);
         }
     }
     
