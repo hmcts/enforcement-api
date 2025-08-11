@@ -182,6 +182,12 @@ tasks.register('runAndPublishConsumerPactTests', Test) {
   classpath = sourceSets.contractTest.runtimeClasspath
 }
 
+tasks.register('fortifyScan', JavaExec) {
+  mainClass = "uk.gov.hmcts.fortifyclient.FortifyClientMainApp"
+  classpath += sourceSets.test.runtimeClasspath
+  jvmArgs = ['--add-opens=java.base/java.lang.reflect=ALL-UNNAMED']
+}
+
 project.ext {
   pactVersion = getCheckedOutGitCommitHash()
 }
@@ -277,9 +283,9 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version: springFrameworkBootVersion
   implementation group: 'com.github.kagkarlsson', name: 'db-scheduler-spring-boot-starter', version: "${dbSchedulerVersion}"
   implementation group: 'commons-beanutils', name: 'commons-beanutils', version: '1.11.0'
-  
+
   runtimeOnly group: 'org.flywaydb', name: 'flyway-database-postgresql', version: flywayVersion
-  
+
   implementation group: 'org.flywaydb', name: 'flyway-core', version: flywayVersion
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springFrameworkBootVersion
   implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.9'
@@ -321,6 +327,7 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
   testImplementation group: 'org.springframework.security', name: 'spring-security-test', version: '6.5.1'
+  testImplementation group: 'com.github.hmcts', name: 'fortify-client', version: '1.4.9', classifier: 'all'
   testImplementation 'com.h2database:h2'
 
   contractTestImplementation group: 'au.com.dius.pact.consumer', name: 'junit5', version: '4.6.17'
