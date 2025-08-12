@@ -318,8 +318,8 @@ dependencies {
     exclude group: 'com.launchdarkly', module: 'launchdarkly-java-server-sdk'
   }
 
-  implementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: serenityBddVersion
-  implementation group: 'net.serenity-bdd', name: 'serenity-core', version: serenityBddVersion
+  testImplementation group: 'net.serenity-bdd', name: 'serenity-rest-assured', version: serenityBddVersion
+  testImplementation group: 'net.serenity-bdd', name: 'serenity-core', version: serenityBddVersion
   testImplementation group: 'net.serenity-bdd', name: 'serenity-junit5', version: serenityBddVersion
   testImplementation group: 'org.junit.platform', name: 'junit-platform-suite-api', version: '1.13.4'
 
