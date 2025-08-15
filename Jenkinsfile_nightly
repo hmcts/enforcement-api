@@ -11,4 +11,28 @@ def type = "java"
 def product = "enforcement"
 def component = "api"
 
-withNightlyPipeline(type, product, component) {}
+
+def secrets = [
+  'enforcement-${env}': [
+    secret('enforcement-api-s2s-secret', 'ENFORCEMENT_API_S2S_SECRET')
+  ]
+]
+
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+  [$class     : 'AzureKeyVaultSecret',
+   secretType : 'Secret',
+   name       : secretName,
+   version    : '',
+   envVariable: envVar
+  ]
+}
+
+withNightlyPipeline(type, product, component) {
+  enableSlackNotifications('#enforcement-tech')
+  loadVaultSecrets(secrets)
+  enableFortifyScan()
+  afterSuccess('fortify-scan') {
+    steps.archiveArtifacts allowEmptyArchive: true,
+      artifacts: '**/Fortify Scan/**/*'
+  }
+}
