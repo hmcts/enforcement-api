@@ -307,6 +307,8 @@ dependencies {
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0'
   implementation group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+  implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '10.1.44'
+  implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: '10.1.44'
 
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
 
