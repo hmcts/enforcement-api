@@ -270,6 +270,7 @@ ext {
   springSecurityVersion = "6.5.2"
   pactVersion = "4.6.17"
   dbSchedulerVersion = "16.0.0"
+  tomcatEmbedVersion = "10.1.44"
 }
 
 ext['snakeyaml.version'] = '2.2'
@@ -307,6 +308,8 @@ dependencies {
   implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.18.0'
   implementation group: 'org.projectlombok', name: 'lombok', version: lombokVersion
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: lombokVersion
+  implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: tomcatEmbedVersion
+  implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-websocket', version: tomcatEmbedVersion
 
   testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '5.5.5'
 
