@@ -21,6 +21,6 @@ class RootControllerTest {
     void shouldReturnWelcomeMessage() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/"))
             .andExpect(status().isOk())
-            .andExpect(content().string("Welcome to the Enforcement API"));
+            .andExpect(content().string("Just testing what is in place.Welcome to the Enforcement API"));
     }
 }
