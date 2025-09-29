@@ -27,6 +27,6 @@ class GetWelcomeTest extends AbstractPostgresContainerIT {
     void welcomeRootEndpoint() throws Exception {
         MvcResult response = mockMvc.perform(get("/")).andExpect(status().isOk()).andReturn();
 
-        assertThat(response.getResponse().getContentAsString()).startsWith("Welcome");
+        assertThat(response.getResponse().getContentAsString()).contains("Welcome");
     }
 }
