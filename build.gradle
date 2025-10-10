@@ -199,7 +199,7 @@ pact {
     pactBrokerUrl = System.getenv("PACT_BROKER_URL") ?: 'http://localhost:80'
   }
   publish {
-    pactDirectory = "$projectDir/pacts"
+    pactDirectory = "pacts"
     tags = [System.getenv("PACT_BRANCH_NAME") ?:'Dev']
     version = project.pactVersion
   }
