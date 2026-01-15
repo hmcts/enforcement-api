@@ -23,6 +23,7 @@ public class RootController {
      */
     @GetMapping("/")
     public ResponseEntity<String> welcome() {
-        return ok("Welcome to the Enforcement API");
+        return ok("Just testing what is in place."
+                      + "Welcome to the Enforcement API");
     }
 }
