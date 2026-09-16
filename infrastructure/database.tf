@@ -14,7 +14,7 @@ module "postgresql" {
     azurerm.postgres_network = azurerm.postgres_network
   }
 
-  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=master"
+  source = "git@github.com:hmcts/terraform-module-postgresql-flexible?ref=DTSPO-30107-additional-postgres-admins"
   env    = var.env
 
   product       = var.product
@@ -23,15 +23,16 @@ module "postgresql" {
   business_area = "cft"
 
   subnet_suffix = "expanded"
-  common_tags = var.common_tags
+  common_tags   = var.common_tags
   pgsql_databases = [
     {
       name : var.product
     }
   ]
 
-  pgsql_version = var.pgsql_version
-  admin_user_object_id = var.jenkins_AAD_objectId
+  pgsql_version                 = var.pgsql_version
+  admin_user_object_id          = var.jenkins_AAD_objectId
+  preserve_legacy_jenkins_admin = false
 }
 
 resource "azurerm_key_vault_secret" "POSTGRES-USER" {
